@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정보처리기사 실기 — Study Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1528;
+    --bg3: #141a30;
+    --border: #1e2d50;
+    --accent: #4f8ef7;
+    --accent2: #38d9c0;
+    --accent3: #f7c948;
+    --accent4: #f76b8a;
+    --accent5: #a78bfa;
+    --text: #e2e8f8;
+    --text-dim: #8899cc;
+    --text-muted: #4a5a80;
+    --green: #34d399;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, #060b18 0%, #0a1535 50%, #06111f 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 70px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.035) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(79,142,247,0.06) 0%, transparent 70%);
+    top: -200px; right: -100px;
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; max-width: 960px; margin: 0 auto; }
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  }
+  .hero-tag {
+    background: rgba(79,142,247,0.1);
+    border: 1px solid rgba(79,142,247,0.25);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .hero-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(42px, 7vw, 84px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .accent2 { color: var(--accent2); }
+  .hero-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-top: 18px;
+    max-width: 500px;
+    line-height: 1.7;
+  }
+  .hero-stats {
+    display: flex; gap: 24px; margin-top: 30px; flex-wrap: wrap;
+  }
+  .stat {
+    text-align: left;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ─── MAIN ─── */
+  .main { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 120px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .progress-pct {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  /* ─── CHAPTER GRID ─── */
+  .chapter-section { margin-bottom: 48px; }
+  .chapter-section-title {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chapter-section-title h2 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .chapter-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media(max-width:700px){ .cards-grid { grid-template-columns: 1fr 1fr; } }
+  @media(max-width:450px){ .cards-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 20px 18px;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(79,142,247,0.3);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .card:hover::before { opacity: 1; }
+
+  /* color themes */
+  .card.blue::before   { background: linear-gradient(to right, var(--accent), #6ab0ff); }
+  .card.teal::before   { background: linear-gradient(to right, var(--accent2), #6decd8); }
+  .card.yellow::before { background: linear-gradient(to right, var(--accent3), #ffe07a); }
+  .card.pink::before   { background: linear-gradient(to right, var(--accent4), #ff9fb0); }
+  .card.purple::before { background: linear-gradient(to right, var(--accent5), #c4b5fd); }
+  .card.green::before  { background: linear-gradient(to right, var(--green), #6ee7b7); }
+  .card.orange::before { background: linear-gradient(to right, #fb923c, #fdba74); }
+
+  .card-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .card-icon { font-size: 28px; margin-bottom: 10px; }
+  .card-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .card-en {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .card-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .card-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .status-done { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+  .status-todo { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border); }
+  .status-wip  { background: rgba(247,201,72,0.08); color: var(--accent3); border: 1px solid rgba(247,201,72,0.2); }
+  .card-star { color: var(--accent3); font-size: 12px; letter-spacing: 1px; }
+
+  /* COMING SOON overlay */
+  .card.coming-soon {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .card.coming-soon::after {
+    content: 'Coming Soon';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    background: rgba(10,14,26,0.85);
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  /* ─── BOTTOM BAR ─── */
+  .bottom-bar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .bottom-icon { font-size: 22px; }
+  .bottom-text { font-size: 13px; color: var(--text-dim); flex: 1; }
+  .bottom-text b { color: var(--accent); }
+  .bottom-btn {
+    background: rgba(79,142,247,0.1);
+    border: 1px solid rgba(79,142,247,0.25);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .bottom-btn:hover { background: rgba(79,142,247,0.2); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  /* ══════════════════════════════
+     MOBILE RESPONSIVE — max 640px
+     ══════════════════════════════ */
+  @media (max-width: 640px) {
+    /* Hero */
+    .hero { padding: 36px 20px 32px; }
+    .hero h1 { font-size: 38px; line-height: 0.95; }
+    .hero-desc { font-size: 13px; margin-top: 14px; }
+    .hero-stats { gap: 20px; margin-top: 22px; }
+    .stat-num { font-size: 28px; }
+    .stat-label { font-size: 9px; }
+    .hero-eyebrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .hero-tag { font-size: 9px; letter-spacing: 1.5px; padding: 3px 10px; }
+    .hero-year { font-size: 9px; }
+
+    /* Main padding */
+    .main { padding: 28px 16px 60px; }
+
+    /* Progress */
+    .progress-wrap { padding: 14px 16px; gap: 12px; }
+    .progress-label { font-size: 9px; }
+    .progress-pct { font-size: 18px; }
+
+    /* Chapter section */
+    .chapter-section { margin-bottom: 32px; }
+    .chapter-section-title h2 { font-size: 10px; letter-spacing: 2px; }
+
+    /* Cards grid → 2 col on mobile, 1 col on very small */
+    .cards-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+    .card { padding: 16px 14px 14px; }
+    .card-number { font-size: 9px; margin-bottom: 8px; }
+    .card-icon { font-size: 22px; margin-bottom: 7px; }
+    .card-title { font-size: 13px; }
+    .card-en { font-size: 9px; margin-bottom: 7px; }
+    .card-desc { font-size: 11px; display: none; } /* hide desc on mobile for space */
+    .card-footer { margin-top: 10px; padding-top: 10px; }
+    .card-status { font-size: 9px; padding: 2px 6px; }
+    .card-star { font-size: 11px; }
+
+    /* Coming soon overlay text */
+    .card.coming-soon::after { font-size: 9px; padding: 5px 10px; }
+
+    /* Bottom bar */
+    .bottom-bar { padding: 16px; flex-direction: column; gap: 10px; }
+    .bottom-text { font-size: 12px; }
+    .bottom-btn { width: 100%; text-align: center; padding: 10px; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    .cards-grid { grid-template-columns: 1fr !important; }
+    .hero h1 { font-size: 32px; }
+  }
+
+  /* Tablet */
+  @media (min-width: 641px) and (max-width: 900px) {
+    .hero { padding: 44px 28px 36px; }
+    .main { padding: 36px 20px 60px; }
+    .cards-grid { grid-template-columns: 1fr 1fr !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="hero-tag">정보처리기사 실기</div>
+      <div class="hero-year">2024 · 2025</div>
+    </div>
+    <h1>
+      Engineer<br>
+      <span class="accent">Info</span><span class="accent2">Processing</span><br>
+      Study Hub
+    </h1>
+    <div class="hero-desc">
+      핵심 이론을 시각적으로 정리한 학습 허브.<br>
+      각 챕터를 클릭해 상세 학습자료로 이동하세요.
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="total-chapters">15</div>
+        <div class="stat-label">총 챕터</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="done-count">2</div>
+        <div class="stat-label">완성됨</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="todo-count">13</div>
+        <div class="stat-label">준비중</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-label">OVERALL PROGRESS</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:13%"></div></div>
+    <div class="progress-pct" id="progress-pct">13%</div>
+  </div>
+
+  <!-- PART 1 -->
+  <div class="chapter-section">
+    <div class="chapter-section-title"><h2>Part 1 · 소프트웨어 설계</h2></div>
+    <div class="cards-grid">
+
+      <a class="card blue" href="uml.html">
+        <div class="card-number">CH 01</div>
+        <div class="card-icon">📐</div>
+        <div class="card-title">UML</div>
+        <div class="card-en">Unified Modeling Language</div>
+        <div class="card-desc">구성요소, 다이어그램 13종, 관계 6종, 클래스 다이어그램</div>
+        <div class="card-footer">
+          <span class="card-status status-done">✓ DONE</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </a>
+
+      <a class="card teal" href="design-pattern.html">
+        <div class="card-number">CH 02</div>
+        <div class="card-icon">🎨</div>
+        <div class="card-title">디자인 패턴</div>
+        <div class="card-en">Design Patterns</div>
+        <div class="card-desc">GoF 패턴 23종 — 생성·구조·행위 패턴 + 스토리텔링</div>
+        <div class="card-footer">
+          <span class="card-status status-done">✓ DONE</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </a>
+
+      <div class="card yellow coming-soon">
+        <div class="card-number">CH 03</div>
+        <div class="card-icon">🧩</div>
+        <div class="card-title">소프트웨어 아키텍처</div>
+        <div class="card-en">SW Architecture</div>
+        <div class="card-desc">아키텍처 패턴, 모듈화, 응집도·결합도</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PART 2 -->
+  <div class="chapter-section">
+    <div class="chapter-section-title"><h2>Part 2 · 소프트웨어 개발</h2></div>
+    <div class="cards-grid">
+
+      <div class="card pink coming-soon">
+        <div class="card-number">CH 04</div>
+        <div class="card-icon">🧪</div>
+        <div class="card-title">소프트웨어 테스트</div>
+        <div class="card-en">SW Testing</div>
+        <div class="card-desc">블랙박스·화이트박스 테스트, 커버리지</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+      <div class="card purple coming-soon">
+        <div class="card-number">CH 05</div>
+        <div class="card-icon">🔧</div>
+        <div class="card-title">형상관리</div>
+        <div class="card-en">Configuration Management</div>
+        <div class="card-desc">Git, SVN, CVS, 버전관리 도구</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★</span>
+        </div>
+      </div>
+
+      <div class="card green coming-soon">
+        <div class="card-number">CH 06</div>
+        <div class="card-icon">🗂️</div>
+        <div class="card-title">자료구조 & 알고리즘</div>
+        <div class="card-en">Data Structure & Algorithm</div>
+        <div class="card-desc">정렬, 탐색, 스택·큐·트리 등</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PART 3 -->
+  <div class="chapter-section">
+    <div class="chapter-section-title"><h2>Part 3 · 데이터베이스</h2></div>
+    <div class="cards-grid">
+
+      <div class="card orange coming-soon">
+        <div class="card-number">CH 07</div>
+        <div class="card-icon">🗃️</div>
+        <div class="card-title">SQL</div>
+        <div class="card-en">Structured Query Language</div>
+        <div class="card-desc">DDL·DML·DCL, 조인, 서브쿼리, 집계 함수</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+      <div class="card blue coming-soon">
+        <div class="card-number">CH 08</div>
+        <div class="card-icon">🔑</div>
+        <div class="card-title">키와 무결성</div>
+        <div class="card-en">Keys & Integrity</div>
+        <div class="card-desc">기본키·외래키·후보키·대체키·슈퍼키</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+      <div class="card teal coming-soon">
+        <div class="card-number">CH 09</div>
+        <div class="card-icon">📊</div>
+        <div class="card-title">정규화</div>
+        <div class="card-en">Normalization</div>
+        <div class="card-desc">1NF~BCNF, 이상(Anomaly), 함수적 종속</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PART 4 -->
+  <div class="chapter-section">
+    <div class="chapter-section-title"><h2>Part 4 · 네트워크 & 보안</h2></div>
+    <div class="cards-grid">
+
+      <div class="card purple coming-soon">
+        <div class="card-number">CH 10</div>
+        <div class="card-icon">🌐</div>
+        <div class="card-title">OSI 7계층</div>
+        <div class="card-en">OSI 7 Layer</div>
+        <div class="card-desc">각 계층별 역할, 프로토콜, 장비</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+      <div class="card pink coming-soon">
+        <div class="card-number">CH 11</div>
+        <div class="card-icon">🔐</div>
+        <div class="card-title">암호화</div>
+        <div class="card-en">Encryption</div>
+        <div class="card-desc">대칭키·비대칭키, DES·AES·RSA</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★</span>
+        </div>
+      </div>
+
+      <div class="card yellow coming-soon">
+        <div class="card-number">CH 12</div>
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">네트워크 공격 & 보안</div>
+        <div class="card-en">Network Security</div>
+        <div class="card-desc">DDoS, 스머핑, 스니핑, 방화벽 등</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PART 5 -->
+  <div class="chapter-section">
+    <div class="chapter-section-title"><h2>Part 5 · 운영체제</h2></div>
+    <div class="cards-grid">
+
+      <div class="card green coming-soon">
+        <div class="card-number">CH 13</div>
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">프로세스 스케줄링</div>
+        <div class="card-en">Process Scheduling</div>
+        <div class="card-desc">선점형·비선점형, FCFS·SJF·RR·Priority</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+      <div class="card orange coming-soon">
+        <div class="card-number">CH 14</div>
+        <div class="card-icon">💾</div>
+        <div class="card-title">메모리 관리</div>
+        <div class="card-en">Memory Management</div>
+        <div class="card-desc">페이징, 세그멘테이션, 가상메모리</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★</span>
+        </div>
+      </div>
+
+      <div class="card blue coming-soon">
+        <div class="card-number">CH 15</div>
+        <div class="card-icon">📝</div>
+        <div class="card-title">프로그래밍 언어</div>
+        <div class="card-en">Programming Languages</div>
+        <div class="card-desc">C, Java, Python 코딩 문제 풀이</div>
+        <div class="card-footer">
+          <span class="card-status status-todo">준비중</span>
+          <span class="card-star">★★★</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM CTA -->
+  <div class="bottom-bar">
+    <div class="bottom-icon">💡</div>
+    <div class="bottom-text">
+      새로운 챕터 학습자료가 필요하다면 <b>Claude에게 요청</b>하세요. 기출 데이터 기반으로 자동 생성됩니다.
+    </div>
+    <span class="bottom-btn">→ 다음 챕터 생성</span>
+  </div>
+
+</div>
+
+<div class="footer">
+  정보처리기사 실기 Study Hub · 기출 PDF 분석 기반 · Powered by Claude
+</div>
+
+</body>
+</html>

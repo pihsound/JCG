@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UML — Visual Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1528;
+    --bg3: #141a30;
+    --border: #1e2d50;
+    --accent: #4f8ef7;
+    --accent2: #38d9c0;
+    --accent3: #f7c948;
+    --accent4: #f76b8a;
+    --accent5: #a78bfa;
+    --text: #e2e8f8;
+    --text-dim: #8899cc;
+    --text-muted: #4a5a80;
+    --card: #111827;
+    --card2: #0d1520;
+    --green: #34d399;
+    --orange: #fb923c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, #060b18 0%, #0a1535 40%, #061020 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(79,142,247,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(56,217,192,0.05) 0%, transparent 50%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .hero-inner { position: relative; max-width: 960px; margin: 0 auto; }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(79,142,247,0.12);
+    border: 1px solid rgba(79,142,247,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(52px, 8vw, 96px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    margin-top: 16px;
+    letter-spacing: 1px;
+  }
+  .hero-badges { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+  }
+  .badge b { color: var(--accent2); }
+
+  /* ─── LAYOUT ─── */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 60px 0; border-bottom: 1px solid var(--border); }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 38px;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-bottom: 32px;
+    line-height: 1;
+  }
+  .section-title .hl { color: var(--accent2); }
+
+  /* ─── CONCEPT BOX ─── */
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px){ .concept-grid { grid-template-columns: 1fr; } }
+  .concept-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .concept-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .concept-card.blue::before { background: var(--accent); }
+  .concept-card.teal::before { background: var(--accent2); }
+  .concept-card.yellow::before { background: var(--accent3); }
+  .concept-card.pink::before { background: var(--accent4); }
+  .concept-card.purple::before { background: var(--accent5); }
+  .concept-card.green::before { background: var(--green); }
+  .concept-card:hover { border-color: rgba(79,142,247,0.3); }
+  .concept-icon { font-size: 28px; margin-bottom: 10px; }
+  .concept-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .concept-name .en {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 6px;
+  }
+  .concept-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .concept-example {
+    margin-top: 10px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.03);
+    border-left: 2px solid var(--border);
+    padding: 6px 10px;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ─── UML COMPONENTS VISUAL ─── */
+  .components-visual {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+  .comp-row {
+    display: flex; align-items: center; gap: 0; margin-bottom: 0;
+  }
+  .comp-item {
+    flex: 1;
+    text-align: center;
+    padding: 20px 12px;
+    position: relative;
+  }
+  .comp-item::after {
+    content: '➔';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+  .comp-item:last-child::after { display: none; }
+  .comp-icon-big {
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 10px;
+  }
+  .comp-item-title { font-weight: 700; font-size: 14px; color: #fff; }
+  .comp-item-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-family: 'Space Mono', monospace; }
+
+  /* ─── DIAGRAM TYPE CARDS ─── */
+  .diagram-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .diagram-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .diagram-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .badge-struct { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
+  .badge-behavior { background: rgba(56,217,192,0.12); color: var(--accent2); border: 1px solid rgba(56,217,192,0.25); }
+  .diagram-header-title { font-weight: 700; font-size: 16px; color: #fff; }
+  .diagram-header-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .diagram-list { padding: 8px 0; }
+  .diagram-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0;
+    padding: 0;
+    border-bottom: 1px solid rgba(30,45,80,0.5);
+  }
+  .diagram-row:last-child { border-bottom: none; }
+  .diagram-name {
+    padding: 16px 24px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    border-right: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .diagram-name .emoji { font-size: 16px; margin-top: 1px; }
+  .diagram-name .name-kr { font-size: 12px; color: var(--text-dim); font-weight: 400; display: block; }
+  .diagram-desc {
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .tag-pill {
+    display: inline-block;
+    background: rgba(247,201,72,0.1);
+    border: 1px solid rgba(247,201,72,0.2);
+    color: var(--accent3);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ─── RELATIONS SVG SECTION ─── */
+  .relations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:640px){ .relations-grid { grid-template-columns: 1fr; } }
+  .relation-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .relation-card:hover { border-color: rgba(79,142,247,0.3); }
+  .relation-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .relation-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+  }
+  .relation-en { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .relation-keyword {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    margin: 8px 0;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .relation-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-top: 6px; }
+  .relation-svg-wrap {
+    margin-top: 14px;
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 12px;
+    overflow: hidden;
+  }
+  .relation-svg-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* ─── THINGS TABLE ─── */
+  .things-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+  }
+  @media(max-width:600px){ .things-grid { grid-template-columns: 1fr 1fr; } }
+  .thing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .thing-card:hover { border-color: rgba(79,142,247,0.3); transform: translateY(-2px); }
+  .thing-icon { font-size: 28px; margin-bottom: 8px; }
+  .thing-name { font-weight: 700; font-size: 13px; color: #fff; }
+  .thing-en { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .thing-desc { font-size: 11px; color: var(--text-dim); margin-top: 8px; line-height: 1.5; }
+
+  /* ─── MEMORY TIPS ─── */
+  .tip-box {
+    background: linear-gradient(135deg, rgba(247,201,72,0.05), rgba(247,201,72,0.02));
+    border: 1px solid rgba(247,201,72,0.2);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .tip-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .tip-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .tip-text { font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .tip-text strong { color: var(--accent3); }
+
+  /* ─── CLASS DIAGRAM ANATOMY ─── */
+  .class-demo {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .class-box {
+    width: 240px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--card2);
+    box-shadow: 0 0 20px rgba(79,142,247,0.1);
+  }
+  .class-name-bar {
+    background: rgba(79,142,247,0.15);
+    border-bottom: 1px solid var(--accent);
+    padding: 10px 16px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+  }
+  .class-section {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+  }
+  .class-section:last-child { border-bottom: none; }
+  .class-attr {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .class-attr .vis { color: var(--accent2); margin-right: 2px; }
+  .class-attr .type { color: var(--accent); }
+  .class-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* ─── VISIBILITY TABLE ─── */
+  .vis-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .vis-table th {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-align: left;
+    font-weight: 700;
+  }
+  .vis-table td {
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    color: var(--text-dim);
+    vertical-align: middle;
+  }
+  .vis-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .vis-symbol {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    width: 48px;
+  }
+
+  /* ─── CHARACTERISTICS ─── */
+  .char-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 0;
+  }
+  @media(max-width:600px){ .char-row { grid-template-columns: 1fr 1fr; } }
+  .char-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .char-card:hover { transform: translateY(-3px); border-color: rgba(79,142,247,0.25); }
+  .char-icon { font-size: 30px; margin-bottom: 10px; }
+  .char-name { font-weight: 700; font-size: 13px; color: #fff; margin-bottom: 6px; }
+  .char-en { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+  .char-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ─── QUIZ SECTION ─── */
+  .quiz-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .quiz-q {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .quiz-num {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .quiz-a {
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--accent2);
+    font-family: 'Space Mono', monospace;
+    background: rgba(56,217,192,0.04);
+    border-left: 3px solid var(--accent2);
+    display: none;
+  }
+  .quiz-block.open .quiz-a { display: block; }
+  .quiz-toggle {
+    margin-left: auto;
+    background: rgba(79,142,247,0.1);
+    border: 1px solid rgba(79,142,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 0;
+    align-self: center;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .quiz-toggle:hover { background: rgba(79,142,247,0.2); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 40px 24px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ─── NAV ─── */
+  .toc {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 40px;
+  }
+  .toc-title { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+  .toc-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .toc-link {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    font-family: 'Space Mono', monospace;
+  }
+  .toc-link:hover { color: var(--accent); border-color: rgba(79,142,247,0.3); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 32px 0;
+  }
+  .emphasis {
+    color: var(--accent3);
+    font-weight: 700;
+  }
+  .mono { font-family: 'Space Mono', monospace; }
+
+  /* ══════════════════════════════
+     MOBILE RESPONSIVE — max 640px
+     ══════════════════════════════ */
+  @media (max-width: 640px) {
+    /* Hero */
+    .hero { padding: 36px 20px 32px; }
+    .hero h1 { font-size: 52px; }
+    .hero-sub { font-size: 13px; }
+    .hero-badges { gap: 7px; }
+    .badge { font-size: 11px; padding: 5px 10px; }
+
+    /* Layout */
+    .container { padding: 0 16px; }
+    .section { padding: 36px 0; }
+    .section-title { font-size: 28px; }
+
+    /* TOC */
+    .toc { padding: 14px 16px; }
+    .toc-links { gap: 6px; }
+    .toc-link { font-size: 11px; padding: 5px 10px; }
+
+    /* Concept grid → 1 col */
+    .concept-grid { grid-template-columns: 1fr !important; }
+
+    /* Components visual — stack vertically */
+    .comp-row { flex-direction: column; align-items: stretch; gap: 0; }
+    .comp-item { padding: 14px 12px; display: flex; align-items: center; gap: 14px; text-align: left; }
+    .comp-item::after { content: '↓'; position: static; transform: none; display: block; text-align: center; color: var(--text-muted); font-size: 16px; margin: 4px 0 0; order: 99; }
+    .comp-item:last-child::after { display: none; }
+    .comp-icon-big { width: 44px; height: 44px; font-size: 20px; flex-shrink: 0; margin: 0; }
+    .components-visual { padding: 20px 16px; }
+
+    /* Things grid → 2 col */
+    .things-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+    .thing-card { padding: 14px 12px; }
+    .thing-icon { font-size: 22px; }
+
+    /* Char row → 2 col */
+    .char-row { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+    .char-card { padding: 16px 12px; }
+    .char-icon { font-size: 24px; }
+
+    /* Diagram rows → stack name above desc */
+    .diagram-row { grid-template-columns: 1fr !important; }
+    .diagram-name {
+      border-right: none !important;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 10px;
+      background: rgba(255,255,255,0.02);
+    }
+    .diagram-desc { padding: 10px 16px 14px; }
+    .diagram-header { padding: 13px 16px; gap: 8px; flex-wrap: wrap; }
+    .diagram-header-count { font-size: 11px; }
+
+    /* Relations grid → 1 col */
+    .relations-grid { grid-template-columns: 1fr !important; }
+
+    /* Class section — stack vertically */
+    .concept-grid > div:first-child,
+    .concept-grid > div:last-child { width: 100%; }
+
+    /* Vis table — smaller padding */
+    .vis-table th, .vis-table td { padding: 8px 10px; font-size: 12px; }
+    .vis-symbol { font-size: 16px; width: 36px; }
+
+    /* Tables — horizontal scroll */
+    .vis-table { font-size: 12px; }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Quiz */
+    .quiz-q { flex-wrap: wrap; gap: 8px; padding: 14px 14px 10px; }
+    .quiz-toggle { margin-left: 0; margin-top: 4px; }
+    .quiz-a { padding: 12px 14px; font-size: 11px; }
+    .quiz-num { flex-shrink: 0; }
+
+    /* Tip box */
+    .tip-box { padding: 14px 16px; gap: 10px; }
+    .tip-text { font-size: 12px; }
+
+    /* Relation cards */
+    .relation-title { flex-wrap: wrap; gap: 6px; }
+    .relation-en { font-size: 10px; }
+
+    /* Section */
+    .section-label { font-size: 9px; }
+  }
+
+  /* Tablet — 641 to 900 */
+  @media (min-width: 641px) and (max-width: 900px) {
+    .hero { padding: 44px 28px 38px; }
+    .char-row { grid-template-columns: 1fr 1fr; }
+    .diagram-row { grid-template-columns: 140px 1fr; }
+    .container { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-tag">정보처리기사 실기 · 소프트웨어 설계</div>
+    <h1>UML<br><span>Visual</span><br>Guide</h1>
+    <div class="hero-sub">Unified Modeling Language — 완전 정복</div>
+    <div class="hero-badges">
+      <div class="badge">구성요소 <b>3가지</b></div>
+      <div class="badge">다이어그램 <b>13종</b></div>
+      <div class="badge">관계 <b>6종</b></div>
+      <div class="badge">빈출 <b>★★★</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div style="height:32px"></div>
+  <div class="toc">
+    <div class="toc-title">목차</div>
+    <div class="toc-links">
+      <a class="toc-link" href="#what">01 UML이란?</a>
+      <a class="toc-link" href="#components">02 구성요소</a>
+      <a class="toc-link" href="#diagrams">03 다이어그램 종류</a>
+      <a class="toc-link" href="#relations">04 관계(Relationships)</a>
+      <a class="toc-link" href="#class">05 클래스 다이어그램</a>
+      <a class="toc-link" href="#quiz">06 기출 퀴즈</a>
+    </div>
+  </div>
+
+  <!-- SECTION 1 — WHAT IS UML -->
+  <div class="section" id="what">
+    <div class="section-label">Section 01</div>
+    <div class="section-title">What is <span class="hl">UML</span>?</div>
+
+    <div class="concept-card blue" style="margin-bottom:20px;">
+      <div class="concept-icon">🔍</div>
+      <div class="concept-name">UML (Unified Modeling Language)</div>
+      <div class="concept-desc">
+        소프트웨어 시스템을 <strong style="color:var(--accent)">시각화·문서화</strong>하며,
+        시스템의 구조와 동작을 <strong style="color:var(--accent)">표준화된 방식</strong>으로 명세하는 모델링 언어.
+        <br>복잡한 시스템을 다양한 다이어그램으로 쉽게 표현하고, 요구사항과 기능을 명확히 정의한다.
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:32px;">UML의 4가지 특징</div>
+    <div class="char-row">
+      <div class="char-card">
+        <div class="char-icon">👁️</div>
+        <div class="char-name">가시화 언어</div>
+        <div class="char-en">Visualization</div>
+        <div class="char-desc">다이어그램으로 시스템 구조·동작을 시각적으로 표현</div>
+      </div>
+      <div class="char-card">
+        <div class="char-icon">📋</div>
+        <div class="char-name">명세화 언어</div>
+        <div class="char-en">Specification</div>
+        <div class="char-desc">표준화된 언어로 시스템 요구사항·기능 명세</div>
+      </div>
+      <div class="char-card">
+        <div class="char-icon">🏗️</div>
+        <div class="char-name">구축 언어</div>
+        <div class="char-en">Construction</div>
+        <div class="char-desc">설계·구현에 도움을 주며 객체지향 개발에서 중요한 역할</div>
+      </div>
+      <div class="char-card">
+        <div class="char-icon">📄</div>
+        <div class="char-name">문서화 언어</div>
+        <div class="char-en">Documentation</div>
+        <div class="char-desc">기능·구조·동작을 표준화된 형태로 문서화</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 — 구성요소 -->
+  <div class="section" id="components">
+    <div class="section-label">Section 02</div>
+    <div class="section-title">UML <span class="hl">구성요소</span></div>
+
+    <!-- Visual flow -->
+    <div class="components-visual">
+      <div style="text-align:center; font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted); letter-spacing:2px; margin-bottom:20px;">UML = 사물 + 관계 + 다이어그램</div>
+      <div class="comp-row">
+        <div class="comp-item">
+          <div class="comp-icon-big" style="background:rgba(79,142,247,0.12);">🧱</div>
+          <div class="comp-item-title">사물 (Things)</div>
+          <div class="comp-item-sub">모델의 요소</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-icon-big" style="background:rgba(56,217,192,0.1);">🔗</div>
+          <div class="comp-item-title">관계 (Relationships)</div>
+          <div class="comp-item-sub">요소 간의 연결</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-icon-big" style="background:rgba(247,201,72,0.1);">📊</div>
+          <div class="comp-item-title">다이어그램 (Diagrams)</div>
+          <div class="comp-item-sub">시각적 표현</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사물 -->
+    <div class="section-label">사물 (Things)</div>
+    <div class="things-grid">
+      <div class="thing-card">
+        <div class="thing-icon">🏛️</div>
+        <div class="thing-name">구조사물</div>
+        <div class="thing-en">Structural Things</div>
+        <div class="thing-desc">시스템의 개념적·물리적 요소<br>예) 클래스, 유스케이스, 컴포넌트</div>
+      </div>
+      <div class="thing-card">
+        <div class="thing-icon">⚡</div>
+        <div class="thing-name">행동사물</div>
+        <div class="thing-en">Behavioral Things</div>
+        <div class="thing-desc">시간·공간에 따라 변화하는 행위<br>예) 상호작용, 상태머신</div>
+      </div>
+      <div class="thing-card">
+        <div class="thing-icon">📦</div>
+        <div class="thing-name">그룹사물</div>
+        <div class="thing-en">Grouping Things</div>
+        <div class="thing-desc">요소들을 그룹으로 묶어 관리<br>예) 패키지</div>
+      </div>
+      <div class="thing-card">
+        <div class="thing-icon">📝</div>
+        <div class="thing-name">주해사물</div>
+        <div class="thing-en">Annotation Things</div>
+        <div class="thing-desc">부가적인 설명·제약 조건<br>예) 주석, 노트</div>
+      </div>
+      <div class="thing-card">
+        <div class="thing-icon">🔌</div>
+        <div class="thing-name">인터페이스</div>
+        <div class="thing-en">Interface</div>
+        <div class="thing-desc">클래스가 제공해야 할 오퍼레이션 세트 정의<br>스테레오타입: <span class="mono" style="color:var(--accent3)">«interface»</span></div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-icon">💡</div>
+      <div>
+        <div class="tip-label">암기 TIP</div>
+        <div class="tip-text">
+          구성요소 3가지는 <strong>사관다</strong> = <strong>사</strong>물 + <strong>관</strong>계 + <strong>다</strong>이어그램으로 외우자!<br>
+          인터페이스는 스테레오타입 <strong>«interface»</strong>로 표시한다는 것도 기출 포인트!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 — 다이어그램 -->
+  <div class="section" id="diagrams">
+    <div class="section-label">Section 03</div>
+    <div class="section-title">Diagram <span class="hl">종류</span></div>
+
+    <!-- 구조 다이어그램 -->
+    <div class="diagram-section">
+      <div class="diagram-header">
+        <div class="diagram-badge badge-struct">Structural</div>
+        <div class="diagram-header-title">구조 다이어그램</div>
+        <div class="diagram-header-count">6종</div>
+      </div>
+      <div class="diagram-list">
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🗂️</span><span><span class="name-kr">클래스</span>Class</span></div>
+          <div class="diagram-desc">객체들의 타입 정의·관계 도식화. 시스템의 구조화. 상속·연관·의존성 표현. <span class="tag-pill">★★★ 빈출</span></div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🔲</span><span><span class="name-kr">객체</span>Object</span></div>
+          <div class="diagram-desc">시스템 내 객체와 이들 간 관계를 <b>특정 시점</b>에 시각화.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">⚙️</span><span><span class="name-kr">컴포넌트</span>Component</span></div>
+          <div class="diagram-desc">소프트웨어의 논리적 구성요소(컴포넌트)와 이들 간의 의존성 나타냄.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🖥️</span><span><span class="name-kr">배치</span>Deployment</span></div>
+          <div class="diagram-desc">시스템의 물리적 배치와 구성요소 간 관계. 하드웨어·네트워크·소프트웨어 구성요소 배치 시각화.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🔩</span><span><span class="name-kr">복합체 구조</span>Complex Structure</span></div>
+          <div class="diagram-desc">시스템 내 복합 구조와 클래스/컴포넌트 내부 구조 및 상호작용 표현.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">📦</span><span><span class="name-kr">패키지</span>Package</span></div>
+          <div class="diagram-desc">시스템의 패키지와 클래스 간 그룹화 및 관계 시각화. <span class="tag-pill">20년4회 23년3회 빈출</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 행위 다이어그램 -->
+    <div class="diagram-section">
+      <div class="diagram-header">
+        <div class="diagram-badge badge-behavior">Behavioral</div>
+        <div class="diagram-header-title">행위 다이어그램</div>
+        <div class="diagram-header-count">7종</div>
+      </div>
+      <div class="diagram-list">
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">👤</span><span><span class="name-kr">유스케이스</span>Use Case</span></div>
+          <div class="diagram-desc">시스템의 기능과 사용자 간 상호작용 표현. 구성요소: <b style="color:var(--accent2)">Actor</b>, <b style="color:var(--accent2)">Use Case</b>, <b style="color:var(--accent2)">System</b></div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">⏱️</span><span><span class="name-kr">순차</span>Sequence</span></div>
+          <div class="diagram-desc">객체 간 상호작용을 <b>시간 순서</b>에 따라 표현. 구성: 활성 객체, 메시지, 생명선, 제어 사각형. 메시지 유형: 동기·비동기·반환·자체</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">💬</span><span><span class="name-kr">커뮤니케이션</span>Communication</span></div>
+          <div class="diagram-desc">객체 간 상호작용과 통신 표현. 시간 흐름보다 <b>객체 간 관계와 통신</b>에 중점.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🔄</span><span><span class="name-kr">상태</span>State</span></div>
+          <div class="diagram-desc">객체 생명주기 동안의 <b>상태 변화</b> 표현. 외부·내부 이벤트에 대한 반응 나타냄.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🏃</span><span><span class="name-kr">활동</span>Activity</span></div>
+          <div class="diagram-desc">시스템의 프로세스·워크플로우 표현. 일반적으로 <b>비즈니스 프로세스</b> 모델링에 사용.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🔀</span><span><span class="name-kr">상호작용</span>Interaction</span></div>
+          <div class="diagram-desc">시스템 상호작용을 고수준 워크플로우로 표현. 활동 다이어그램 + 순차 다이어그램의 혼합 형태.</div>
+        </div>
+        <div class="diagram-row">
+          <div class="diagram-name"><span class="emoji">🕐</span><span><span class="name-kr">타이밍</span>Timing</span></div>
+          <div class="diagram-desc">객체 행동과 시간에 따른 상호작용. <b>실시간 시스템</b>이나 복잡한 상호작용 표현에 유용.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-icon">🧠</div>
+      <div>
+        <div class="tip-label">암기 TIP — 구조 다이어그램 6종</div>
+        <div class="tip-text">
+          <strong>클객컴 배복패</strong> = <strong>클</strong>래스 / <strong>객</strong>체 / <strong>컴</strong>포넌트 / <strong>배</strong>치 / <strong>복</strong>합체 구조 / <strong>패</strong>키지
+        </div>
+      </div>
+    </div>
+    <div class="tip-box" style="margin-top:12px;">
+      <div class="tip-icon">🧠</div>
+      <div>
+        <div class="tip-label">암기 TIP — 행위 다이어그램 7종</div>
+        <div class="tip-text">
+          <strong>유순커 상활상타</strong> = <strong>유</strong>스케이스 / <strong>순</strong>차 / <strong>커</strong>뮤니케이션 / <strong>상</strong>태 / <strong>활</strong>동 / <strong>상</strong>호작용 / <strong>타</strong>이밍
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 — 관계 -->
+  <div class="section" id="relations">
+    <div class="section-label">Section 04</div>
+    <div class="section-title">UML <span class="hl">관계 6종</span></div>
+
+    <div class="relations-grid">
+
+      <!-- 1. 연관 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(79,142,247,0.15);color:var(--accent);">①</div>
+          연관 관계
+          <span class="relation-en">Association</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(79,142,247,0.08);color:var(--accent);">─────────→</div>
+        <div class="relation-desc">두 클래스가 서로 관련이 있음. 가장 일반적인 관계. <b>실선</b>으로 표현.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 60" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="15" width="80" height="30" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="50" y="34" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">학생</text>
+            <rect x="170" y="15" width="80" height="30" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="210" y="34" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">수업</text>
+            <line x1="90" y1="30" x2="168" y2="30" stroke="#4f8ef7" stroke-width="1.5"/>
+            <polygon points="168,26 178,30 168,34" fill="#4f8ef7"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 2. 의존 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(247,107,138,0.12);color:var(--accent4);">②</div>
+          의존 관계
+          <span class="relation-en">Dependency</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(247,107,138,0.08);color:var(--accent4);">- - - - - →</div>
+        <div class="relation-desc">한 클래스가 다른 클래스를 <b>사용</b>하는 관계. <b>점선 화살표</b>. 변경 시 영향을 받을 수 있음.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 60" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="15" width="80" height="30" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="50" y="34" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">주문</text>
+            <rect x="170" y="15" width="80" height="30" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="210" y="34" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">결제</text>
+            <line x1="90" y1="30" x2="168" y2="30" stroke="#f76b8a" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <polygon points="168,26 178,30 168,34" fill="#f76b8a"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 3. 일반화 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(56,217,192,0.1);color:var(--accent2);">③</div>
+          일반화 관계
+          <span class="relation-en">Generalization</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(56,217,192,0.07);color:var(--accent2);">────────▷</div>
+        <div class="relation-desc">IS-A 관계. 한 클래스가 다른 클래스를 포함하는 상위 개념. <b>빈 삼각형 화살표</b>. 상속 관계.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="90" y="5" width="80" height="28" rx="3" fill="#0d1520" stroke="#38d9c0" stroke-width="1.5"/>
+            <text x="130" y="23" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">동물</text>
+            <rect x="10" y="50" width="70" height="25" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="45" y="66" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">강아지</text>
+            <rect x="90" y="50" width="70" height="25" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="125" y="66" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">고양이</text>
+            <rect x="180" y="50" width="70" height="25" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="215" y="66" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">물고기</text>
+            <line x1="45" y1="50" x2="115" y2="33" stroke="#38d9c0" stroke-width="1.5"/>
+            <line x1="125" y1="50" x2="128" y2="33" stroke="#38d9c0" stroke-width="1.5"/>
+            <line x1="215" y1="50" x2="145" y2="33" stroke="#38d9c0" stroke-width="1.5"/>
+            <polygon points="122,33 128,19 134,33" fill="none" stroke="#38d9c0" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 4. 실체화 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(167,139,250,0.12);color:var(--accent5);">④</div>
+          실체화 관계
+          <span class="relation-en">Realization</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(167,139,250,0.07);color:var(--accent5);">- - - - - ▷</div>
+        <div class="relation-desc">인터페이스와 구현 클래스 간의 관계. <b>점선 + 빈 삼각형</b>. «interface»를 구현하는 관계.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="80" y="5" width="100" height="32" rx="3" fill="#0d1520" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="130" y="19" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="Space Mono">«interface»</text>
+            <text x="130" y="32" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">리모컨</text>
+            <rect x="10" y="55" width="90" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="55" y="70" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">선풍기 리모컨</text>
+            <rect x="160" y="55" width="90" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="205" y="70" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">TV 리모컨</text>
+            <line x1="55" y1="55" x2="120" y2="37" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="205" y1="55" x2="140" y2="37" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <polygon points="122,37 130,21 138,37" fill="none" stroke="#a78bfa" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 5. 집약 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(247,201,72,0.1);color:var(--accent3);">⑤</div>
+          집약 관계
+          <span class="relation-en">Aggregation</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(247,201,72,0.07);color:var(--accent3);">◇─────────</div>
+        <div class="relation-desc">HAS-A 관계. 전체 객체가 <b>사라져도 부분 객체는 존재</b>. <b>빈 마름모</b>. 독립적인 생명주기.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 75" xmlns="http://www.w3.org/2000/svg">
+            <rect x="90" y="5" width="80" height="26" rx="3" fill="#0d1520" stroke="#f7c948" stroke-width="1.5"/>
+            <text x="130" y="22" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">불고기</text>
+            <polygon points="130,31 120,37 130,43 140,37" fill="none" stroke="#f7c948" stroke-width="1.5"/>
+            <rect x="10" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="40" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">간장</text>
+            <rect x="100" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="130" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">다시다</text>
+            <rect x="190" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="220" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">미원</text>
+            <line x1="120" y1="37" x2="40" y2="52" stroke="#f7c948" stroke-width="1.5"/>
+            <line x1="130" y1="43" x2="130" y2="52" stroke="#f7c948" stroke-width="1.5"/>
+            <line x1="140" y1="37" x2="220" y2="52" stroke="#f7c948" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="relation-desc" style="margin-top:8px; padding:8px; background:rgba(247,201,72,0.05); border-radius:4px; font-size:11px;">
+          🍖 불고기가 없어도 간장·다시다·미원은 따로 존재 가능!
+        </div>
+      </div>
+
+      <!-- 6. 합성 -->
+      <div class="relation-card">
+        <div class="relation-title">
+          <div class="relation-num" style="background:rgba(251,146,60,0.12);color:var(--orange);">⑥</div>
+          합성 관계
+          <span class="relation-en">Composition</span>
+        </div>
+        <div class="relation-keyword" style="background:rgba(251,146,60,0.07);color:var(--orange);">◆─────────</div>
+        <div class="relation-desc">강한 HAS-A 관계. 전체 객체가 <b>사라지면 부분 객체도 함께 소멸</b>. <b>채워진 마름모</b>. 의존적 생명주기.</div>
+        <div class="relation-svg-wrap">
+          <svg viewBox="0 0 260 75" xmlns="http://www.w3.org/2000/svg">
+            <rect x="90" y="5" width="80" height="26" rx="3" fill="#0d1520" stroke="#fb923c" stroke-width="1.5"/>
+            <text x="130" y="22" text-anchor="middle" fill="#e2e8f8" font-size="12" font-family="Noto Sans KR">책상</text>
+            <polygon points="130,31 120,37 130,43 140,37" fill="#fb923c" stroke="#fb923c" stroke-width="1.5"/>
+            <rect x="10" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="40" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">책상다리</text>
+            <rect x="100" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="130" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">상판</text>
+            <rect x="190" y="52" width="60" height="22" rx="3" fill="#0d1520" stroke="#1e2d50" stroke-width="1.5"/>
+            <text x="220" y="67" text-anchor="middle" fill="#e2e8f8" font-size="11" font-family="Noto Sans KR">나사</text>
+            <line x1="120" y1="37" x2="40" y2="52" stroke="#fb923c" stroke-width="1.5"/>
+            <line x1="130" y1="43" x2="130" y2="52" stroke="#fb923c" stroke-width="1.5"/>
+            <line x1="140" y1="37" x2="220" y2="52" stroke="#fb923c" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="relation-desc" style="margin-top:8px; padding:8px; background:rgba(251,146,60,0.05); border-radius:4px; font-size:11px;">
+          🪑 책상이 사라지면 책상다리·상판·나사도 함께 소멸!
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 비교 표 -->
+    <div class="divider"></div>
+    <div class="section-label">집약 vs 합성 핵심 비교</div>
+    <table class="vis-table" style="margin-top:8px;">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>집약 (Aggregation)</th>
+          <th>합성 (Composition)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>기호</b></td>
+          <td class="mono" style="color:var(--accent3);">◇ (빈 마름모)</td>
+          <td class="mono" style="color:var(--orange);">◆ (채워진 마름모)</td>
+        </tr>
+        <tr>
+          <td><b>관계</b></td>
+          <td>약한 HAS-A</td>
+          <td>강한 HAS-A</td>
+        </tr>
+        <tr>
+          <td><b>생명주기</b></td>
+          <td>독립적 (전체가 사라져도 부분은 OK)</td>
+          <td>의존적 (전체가 사라지면 부분도 소멸)</td>
+        </tr>
+        <tr>
+          <td><b>예시</b></td>
+          <td>불고기 ◇ 간장 (간장은 독립 존재)</td>
+          <td>책상 ◆ 책상다리 (분리 불가)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 5 — 클래스 다이어그램 -->
+  <div class="section" id="class">
+    <div class="section-label">Section 05</div>
+    <div class="section-title">Class <span class="hl">Diagram</span> 해부</div>
+
+    <div class="concept-grid" style="margin-bottom:24px;">
+      <div>
+        <div class="section-label">클래스 박스 구조</div>
+        <div class="class-demo">
+          <div class="class-box">
+            <div class="class-name-bar">학생 (Student)</div>
+            <div class="class-section">
+              <div class="class-label">속성 (Attributes)</div>
+              <div class="class-attr"><span class="vis">-</span> 이름 : <span class="type">String</span></div>
+              <div class="class-attr"><span class="vis">-</span> 나이 : <span class="type">int</span></div>
+              <div class="class-attr"><span class="vis">#</span> 학번 : <span class="type">String</span></div>
+            </div>
+            <div class="class-section">
+              <div class="class-label">오퍼레이션 (Operations)</div>
+              <div class="class-attr"><span class="vis">+</span> 공부하다() : <span class="type">void</span></div>
+              <div class="class-attr"><span class="vis">+</span> 이름가져오기() : <span class="type">String</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">접근제어자 (Visibility)</div>
+        <table class="vis-table" style="margin-top:8px;">
+          <thead><tr><th>기호</th><th>의미</th><th>접근 범위</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="vis-symbol" style="color:var(--green);">+</td>
+              <td><b style="color:var(--green);">Public</b></td>
+              <td>모든 클래스에서 접근 가능</td>
+            </tr>
+            <tr>
+              <td class="vis-symbol" style="color:var(--accent4);">-</td>
+              <td><b style="color:var(--accent4);">Private</b></td>
+              <td>해당 클래스 내부에서만</td>
+            </tr>
+            <tr>
+              <td class="vis-symbol" style="color:var(--accent3);">#</td>
+              <td><b style="color:var(--accent3);">Protected</b></td>
+              <td>해당 클래스 + 하위 클래스</td>
+            </tr>
+            <tr>
+              <td class="vis-symbol" style="color:var(--accent5);">~</td>
+              <td><b style="color:var(--accent5);">Package</b></td>
+              <td>동일 패키지 내 클래스</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tip-box" style="margin-top:12px;">
+          <div class="tip-icon">💡</div>
+          <div>
+            <div class="tip-label">암기 TIP</div>
+            <div class="tip-text"><strong>+ 공</strong>개 <strong>- 사</strong>유 <strong># 보</strong>호 <strong>~ 패</strong>키지</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 — QUIZ -->
+  <div class="section" id="quiz">
+    <div class="section-label">Section 06</div>
+    <div class="section-title">기출 <span class="hl">Quiz</span></div>
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:24px; font-family:'Space Mono',monospace;">정답 보기 버튼을 클릭하세요 →</div>
+
+    <div class="quiz-block" id="q1">
+      <div class="quiz-q">
+        <div class="quiz-num">Q1</div>
+        UML의 구성요소 3가지를 쓰시오.
+        <button class="quiz-toggle" onclick="toggleQuiz('q1')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 사물(Things), 관계(Relationships), 다이어그램(Diagram)</div>
+    </div>
+
+    <div class="quiz-block" id="q2">
+      <div class="quiz-q">
+        <div class="quiz-num">Q2</div>
+        클래스들 사이의 전체 또는 부분 관계로, 전체 객체가 사라져도 부분 객체는 독립적으로 존재하는 관계는?
+        <button class="quiz-toggle" onclick="toggleQuiz('q2')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 집약 관계 (Aggregation) — 빈 마름모 ◇</div>
+    </div>
+
+    <div class="quiz-block" id="q3">
+      <div class="quiz-q">
+        <div class="quiz-num">Q3</div>
+        한 클래스가 다른 클래스를 포함하는 상위 개념일 때의 IS-A 관계를 무엇이라 하는가?
+        <button class="quiz-toggle" onclick="toggleQuiz('q3')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 일반화 관계 (Generalization)</div>
+    </div>
+
+    <div class="quiz-block" id="q4">
+      <div class="quiz-q">
+        <div class="quiz-num">Q4</div>
+        구조 다이어그램 중, 시스템의 패키지와 클래스 간 그룹화 및 이들 간의 관계를 시각화하는 다이어그램은?
+        <button class="quiz-toggle" onclick="toggleQuiz('q4')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 패키지 다이어그램 (Package Diagram)</div>
+    </div>
+
+    <div class="quiz-block" id="q5">
+      <div class="quiz-q">
+        <div class="quiz-num">Q5</div>
+        UML에서 클래스와 같은 모델 요소 또는 컴포넌트가 구현해야 하는 오퍼레이션 세트를 정의하는 모델 요소는?
+        <button class="quiz-toggle" onclick="toggleQuiz('q5')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 인터페이스 (Interface) — 스테레오타입 «interface»로 표시</div>
+    </div>
+
+    <div class="quiz-block" id="q6">
+      <div class="quiz-q">
+        <div class="quiz-num">Q6</div>
+        순차 다이어그램(Sequence Diagram)의 구성요소 4가지를 쓰시오.
+        <button class="quiz-toggle" onclick="toggleQuiz('q6')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ 활성 객체, 메시지, 생명선(Lifeline), 제어 사각형</div>
+    </div>
+
+    <div class="quiz-block" id="q7">
+      <div class="quiz-q">
+        <div class="quiz-num">Q7</div>
+        다음 UML 관계를 쓰시오.<br>
+        ① 클래스들 사이의 전체 또는 부분 같은 관계<br>
+        ② 한 클래스가 다른 클래스를 포함하는 상위 개념일 때의 IS-A 관계<br>
+        ③ «interface»를 구현하는 관계
+        <button class="quiz-toggle" onclick="toggleQuiz('q7')">정답 보기</button>
+      </div>
+      <div class="quiz-a">✅ ① 집약 관계(Aggregation)  ② 일반화 관계(Generalization)  ③ 실체화 관계(Realization)</div>
+    </div>
+
+  </div><!-- /section -->
+
+</div><!-- /container -->
+
+<div class="footer">
+  UML Visual Study Guide · 정보처리기사 실기 대비 · Powered by Claude
+</div>
+
+<script>
+function toggleQuiz(id) {
+  const block = document.getElementById(id);
+  block.classList.toggle('open');
+  const btn = block.querySelector('.quiz-toggle');
+  btn.textContent = block.classList.contains('open') ? '정답 숨기기' : '정답 보기';
+}
+</script>
+</body>
+</html>

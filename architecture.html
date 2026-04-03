@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소프트웨어 아키텍처 — 정보처리기사 실기</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1c2333;
+  --border:#252d40;--border2:#2d3a55;
+  --text:#e2e8f0;--dim:#94a3b8;--muted:#475569;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;
+  --yellow:#eab308;--teal:#14b8a6;--orange:#f97316;--purple:#a855f7;
+  --accent:#14b8a6; /* 청록 테마 */
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.75;}
+#prog-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:999;transition:width .1s;}
+.page{max-width:740px;margin:0 auto;padding:0 20px 80px;}
+.page-header{padding:40px 0 32px;border-bottom:1px solid var(--border);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-decoration:none;font-family:'Space Mono',monospace;margin-bottom:20px;transition:color .15s;}
+.back-btn:hover{color:var(--accent);}
+.ch-badge{font-family:'Space Mono',monospace;font-size:11px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);color:var(--accent);padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+h1.page-title{font-size:30px;font-weight:700;color:#fff;margin-top:12px;line-height:1.2;}
+.page-meta{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.meta-item{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.tag{font-size:11px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);padding:2px 8px;border-radius:10px;}
+.section{padding:40px 0;border-bottom:1px solid var(--border);}
+.section-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.section-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);min-width:28px;margin-top:2px;}
+.section-title{font-size:20px;font-weight:700;color:#fff;line-height:1.3;}
+.exam-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.badge-exam{font-size:11px;padding:2px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;background:#4c0519;color:#fca5a5;border:1px solid rgba(252,165,165,.2);}
+.def-box{border-left:3px solid var(--accent);background:rgba(20,184,166,.05);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+.def-box p{font-size:14px;color:var(--text);line-height:1.7;}
+.def-box strong{color:var(--accent);}
+.story-box{background:rgba(234,179,8,.04);border:1px solid rgba(234,179,8,.18);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.story-box .sl{font-size:11px;color:var(--yellow);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.story-box p{font-size:13px;color:var(--dim);line-height:1.7;}
+.story-box strong{color:var(--yellow);}
+.ex-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.ex-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.ct{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;}
+.ct th{background:var(--bg3);border:1px solid var(--border);padding:9px 13px;color:var(--dim);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-align:left;}
+.ct td{border:1px solid var(--border);padding:9px 13px;color:var(--dim);vertical-align:top;line-height:1.6;}
+.ct td:first-child{font-weight:700;color:var(--text);}
+.ct tr:hover td{background:rgba(255,255,255,.015);}
+
+/* 아키텍처 패턴 카드 */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+.arch-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;border-top:3px solid var(--accent);transition:transform .15s;}
+.arch-card:hover{transform:translateY(-2px);}
+.arch-icon{font-size:22px;margin-bottom:8px;}
+.arch-name{font-weight:700;font-size:14px;color:#fff;margin-bottom:3px;}
+.arch-en{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;}
+.arch-desc{font-size:12px;color:var(--dim);line-height:1.6;}
+.arch-ex{font-size:11px;color:var(--teal);margin-top:6px;font-family:'Space Mono',monospace;}
+
+/* 결합도/응집도 스케일 */
+.scale-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0;}
+.scale-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.scale-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:16px;}
+.scale-bar{position:relative;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:16px;overflow:hidden;}
+.scale-bar::before{content:'';position:absolute;inset:0;border-radius:18px;}
+.scale-label-l{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;z-index:1;}
+.scale-label-r{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;z-index:1;}
+.coupling-bar::before{background:linear-gradient(to right,rgba(34,197,94,.3),rgba(239,68,68,.3));}
+.coupling-bar .scale-label-l{color:#4ade80;}
+.coupling-bar .scale-label-r{color:#f87171;}
+.cohesion-bar::before{background:linear-gradient(to right,rgba(59,130,246,.3),rgba(239,68,68,.3));}
+.cohesion-bar .scale-label-l{color:#60a5fa;}
+.cohesion-bar .scale-label-r{color:#f87171;}
+
+/* 척도 아이템 */
+.scale-items{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;}
+.si{flex:1;min-width:70px;border-radius:6px;padding:10px 8px;text-align:center;border:1px solid;}
+.si-name{font-weight:700;font-size:11px;color:#fff;margin-bottom:2px;}
+.si-en{font-family:'Space Mono',monospace;font-size:9px;margin-bottom:5px;}
+.si-desc{font-size:10px;color:var(--dim);line-height:1.4;}
+
+/* 결합도 colors: 좋음(낮음)→나쁨(높음) */
+.c1{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25);} .c1 .si-en{color:#4ade80;}
+.c2{background:rgba(134,239,172,.07);border-color:rgba(134,239,172,.2);}  .c2 .si-en{color:#86efac;}
+.c3{background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.2);}  .c3 .si-en{color:#fde047;}
+.c4{background:rgba(251,146,60,.06);border-color:rgba(251,146,60,.2);}  .c4 .si-en{color:#fdba74;}
+.c5{background:rgba(249,115,22,.07);border-color:rgba(249,115,22,.25);}  .c5 .si-en{color:#fb923c;}
+.c6{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2);}  .c6 .si-en{color:#f87171;}
+
+/* 응집도 colors: 좋음(높음)→나쁨(낮음) */
+.h1{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);}  .h1 .si-en{color:#60a5fa;}
+.h2{background:rgba(56,189,248,.07);border-color:rgba(56,189,248,.25);}  .h2 .si-en{color:#7dd3fc;}
+.h3{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.2);}  .h3 .si-en{color:#67e8f9;}
+.h4{background:rgba(20,184,166,.06);border-color:rgba(20,184,166,.2);}  .h4 .si-en{color:#5eead4;}
+.h5{background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.2);}  .h5 .si-en{color:#fde047;}
+.h6{background:rgba(249,115,22,.06);border-color:rgba(249,115,22,.2);}  .h6 .si-en{color:#fdba74;}
+.h7{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2);}  .h7 .si-en{color:#f87171;}
+
+/* Fan-in/out */
+.fan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.fan-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.fan-title{font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;}
+.fan-desc{font-size:12px;color:var(--dim);line-height:1.5;margin-bottom:8px;}
+.fan-formula{font-family:'Space Mono',monospace;font-size:12px;padding:7px 12px;border-radius:5px;display:inline-block;color:var(--text);}
+
+/* 순서 맞추기 드래그 퀴즈 */
+.rank-quiz{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin:16px 0;}
+.rank-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.rank-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:16px;}
+.rank-section{margin-bottom:20px;}
+.rank-label{font-size:12px;font-weight:700;color:var(--dim);margin-bottom:8px;font-family:'Space Mono',monospace;letter-spacing:1px;}
+.rank-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:var(--bg3);border-radius:6px;min-height:46px;border:2px dashed var(--border);}
+.rank-chip{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:6px 12px;font-size:12px;color:var(--text);cursor:grab;font-family:'Space Mono',monospace;user-select:none;transition:all .15s;}
+.rank-chip:hover{border-color:var(--accent);background:rgba(20,184,166,.08);}
+.rank-chip.dragging{opacity:.4;}
+.rank-chip.correct-chip{border-color:var(--green);background:rgba(34,197,94,.08);color:var(--green);}
+.rank-chip.wrong-chip{border-color:var(--red);background:rgba(239,68,68,.06);color:var(--red);}
+.drop-zone{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:rgba(20,184,166,.03);border-radius:6px;min-height:46px;border:2px dashed rgba(20,184,166,.25);}
+.drop-slot{border:1px dashed var(--border2);border-radius:5px;padding:6px 12px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);min-width:60px;text-align:center;}
+.rank-check-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-top:10px;transition:opacity .15s;}
+.rank-check-btn:hover{opacity:.85;}
+.rank-reset-btn{background:transparent;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:10px 16px;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-top:10px;margin-left:8px;}
+.rank-fb{font-size:13px;margin-top:10px;font-family:'Space Mono',monospace;}
+.rank-fb.ok{color:var(--green);}
+.rank-fb.no{color:var(--red);}
+
+/* quiz */
+.quiz-section{padding:40px 0 0;}
+.quiz-header{margin-bottom:24px;}
+.quiz-header h2{font-size:20px;font-weight:700;color:#fff;}
+.quiz-header p{font-size:13px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;}
+.quiz-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:12px;}
+.q-num{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:var(--accent);color:#fff;padding:2px 8px;border-radius:3px;margin-bottom:10px;}
+.q-text{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.q-text em{font-style:normal;background:rgba(20,184,166,.1);border-bottom:2px solid var(--accent);padding:1px 4px;border-radius:2px;color:var(--accent);}
+.blank-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.blank{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:14px;padding:8px 12px;border-radius:5px;width:180px;font-family:'Space Mono',monospace;transition:border-color .15s;outline:none;}
+.blank.wide{width:300px;}
+.blank:focus{border-color:var(--accent);}
+.blank.correct{border-color:var(--green)!important;background:rgba(34,197,94,.06);}
+.blank.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.06);}
+.fb{font-size:12px;font-family:'Space Mono',monospace;margin-top:4px;}
+.fb.ok{color:var(--green);}.fb.no{color:var(--red);}
+.grade-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .15s;font-family:'Noto Sans KR',sans-serif;}
+.grade-btn:hover{opacity:.88;}
+.score-box{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:14px;text-align:center;}
+.score-box.show{display:block;}
+.score-num{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);}
+.retry-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 20px;border-radius:5px;cursor:pointer;font-size:13px;margin-top:12px;font-family:'Noto Sans KR',sans-serif;}
+
+@media(max-width:600px){
+  .page{padding:0 16px 60px;}
+  h1.page-title{font-size:24px;}
+  .section{padding:28px 0;}
+  .section-title{font-size:17px;}
+  .arch-grid{grid-template-columns:1fr;}
+  .fan-grid{grid-template-columns:1fr;}
+  .ct{display:block;overflow-x:auto;}
+  .scale-items{gap:3px;}
+  .si{min-width:60px;}
+  .blank,.blank.wide{width:100%;max-width:280px;}
+}
+</style>
+</head>
+<body>
+<div id="prog-bar"></div>
+<div class="page">
+
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Study Hub</a>
+  <div><span class="ch-badge">Ch 03 · SW 설계</span></div>
+  <h1 class="page-title">소프트웨어 아키텍처<br>SW Architecture</h1>
+  <div class="page-meta">
+    <span class="meta-item">⏱ 약 10분</span>
+    <span class="tag">아키텍처 패턴</span>
+    <span class="tag">결합도 7종</span>
+    <span class="tag">응집도 7종</span>
+    <span class="tag">Fan-in/out</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section" style="padding-top:28px;">
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;font-family:'Space Mono',monospace;">▸ 전체 요약</p>
+  <table class="ct" style="margin-top:0;">
+    <thead><tr><th>개념</th><th>핵심 원칙</th><th>순서 (좋음→나쁨)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="color:var(--green)">결합도 (Coupling)</td>
+        <td>모듈 간 상호 의존 정도 → <strong style="color:var(--text)">낮을수록 Good</strong></td>
+        <td style="font-family:'Space Mono',monospace;font-size:12px;">자료&lt;스탬프&lt;제어&lt;외부&lt;공통&lt;내용</td>
+      </tr>
+      <tr>
+        <td style="color:var(--blue)">응집도 (Cohesion)</td>
+        <td>모듈 내부 기능 집중 정도 → <strong style="color:var(--text)">높을수록 Good</strong></td>
+        <td style="font-family:'Space Mono',monospace;font-size:12px;">기능&gt;순차&gt;교환&gt;절차&gt;시간&gt;논리&gt;우연</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="story-box">
+    <div class="sl">💡 핵심 원칙</div>
+    <p>좋은 모듈 설계 = <strong>결합도 낮게(약하게)</strong> + <strong>응집도 높게(강하게)</strong><br>
+    "각 모듈은 자기 일만 하고(응집도↑), 다른 모듈과 최소한으로 연결(결합도↓)"</p>
+  </div>
+</div>
+
+<!-- SECTION 1: 아키텍처 패턴 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <div class="section-title-wrap">
+      <div class="section-title">소프트웨어 아키텍처 패턴</div>
+      <div class="exam-badges"><span class="badge-exam">23년 1회</span><span class="badge-exam">24년 3회</span></div>
+    </div>
+  </div>
+  <div class="def-box"><p>소프트웨어 시스템의 <strong>전체적인 구조를 설계하는 재사용 가능한 해법</strong>. 반복적으로 발생하는 설계 문제에 대한 검증된 설계 방식.</p></div>
+
+  <div class="arch-grid">
+    <div class="arch-card" style="border-top-color:#3b82f6;">
+      <div class="arch-icon">🍰</div>
+      <div class="arch-name">레이어드 (계층형)</div>
+      <div class="arch-en">Layered Pattern</div>
+      <div class="arch-desc">시스템을 <strong style="color:#fff">계층으로 분리</strong>. 각 계층은 바로 아래 계층에만 의존. 상위 계층은 서비스 제공, 하위 계층은 서비스 사용.</div>
+      <div class="arch-ex">예) OSI 7계층, MVC, 3-tier 아키텍처</div>
+    </div>
+    <div class="arch-card" style="border-top-color:#22c55e;">
+      <div class="arch-icon">🎮</div>
+      <div class="arch-name">클라이언트-서버</div>
+      <div class="arch-en">Client-Server Pattern</div>
+      <div class="arch-desc">서비스를 요청하는 <strong style="color:#fff">클라이언트</strong>와 서비스를 제공하는 <strong style="color:#fff">서버</strong>로 분리. 서버는 여러 클라이언트 요청을 처리.</div>
+      <div class="arch-ex">예) 웹 애플리케이션, 이메일 시스템</div>
+    </div>
+    <div class="arch-card" style="border-top-color:#f97316;">
+      <div class="arch-icon">🚰</div>
+      <div class="arch-name">파이프-필터</div>
+      <div class="arch-en">Pipe-Filter Pattern</div>
+      <div class="arch-desc">데이터를 <strong style="color:#fff">파이프(연결)</strong>로 전달하고, 각 <strong style="color:#fff">필터(처리 단계)</strong>가 변환. 처리 단계를 독립적으로 교체 가능.</div>
+      <div class="arch-ex">예) Unix 쉘 명령어, 컴파일러 (어휘→구문→의미 분석)</div>
+    </div>
+    <div class="arch-card" style="border-top-color:#a855f7;">
+      <div class="arch-icon">📢</div>
+      <div class="arch-name">이벤트-버스</div>
+      <div class="arch-en">Event-Bus Pattern</div>
+      <div class="arch-desc"><strong style="color:#fff">이벤트 소스</strong>가 이벤트 버스에 발행하면, 구독한 <strong style="color:#fff">리스너</strong>가 처리. 느슨한 결합.</div>
+      <div class="arch-ex">예) 알림 시스템, Android 이벤트 처리</div>
+    </div>
+    <div class="arch-card" style="border-top-color:#ec4899;">
+      <div class="arch-icon">🗂️</div>
+      <div class="arch-name">MVC</div>
+      <div class="arch-en">Model-View-Controller</div>
+      <div class="arch-desc"><strong style="color:#fff">Model</strong>(데이터) + <strong style="color:#fff">View</strong>(화면) + <strong style="color:#fff">Controller</strong>(로직)으로 분리. UI와 비즈니스 로직 분리.</div>
+      <div class="arch-ex">예) Spring MVC, Django, Ruby on Rails</div>
+    </div>
+    <div class="arch-card" style="border-top-color:#eab308;">
+      <div class="arch-icon">⭐</div>
+      <div class="arch-name">마스터-슬레이브</div>
+      <div class="arch-en">Master-Slave Pattern</div>
+      <div class="arch-desc"><strong style="color:#fff">마스터</strong>가 작업을 분배하고 슬레이브가 처리 후 결과 반환. 병렬 처리와 오류 허용에 유용.</div>
+      <div class="arch-ex">예) DB 복제, 분산 컴퓨팅</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: 결합도 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <div class="section-title-wrap">
+      <div class="section-title">결합도 (Coupling) — 낮을수록 Good</div>
+      <div class="exam-badges">
+        <span class="badge-exam">20년 1회</span><span class="badge-exam">21년 3회</span>
+        <span class="badge-exam">24년 2회</span><span class="badge-exam">25년 1회</span>
+      </div>
+    </div>
+  </div>
+  <div class="def-box"><p><strong>모듈과 모듈 간의 상호 의존 정도</strong>. 결합도가 낮을수록 모듈의 독립성이 높아지고 유지보수가 쉬워진다.</p></div>
+
+  <div class="scale-box">
+    <div class="scale-title">결합도 스펙트럼</div>
+    <div class="scale-sub">왼쪽(낮음, 좋음) ──────────────── 오른쪽(높음, 나쁨)</div>
+    <div class="scale-bar coupling-bar">
+      <span class="scale-label-l">👍 낮음(독립적)</span>
+      <span class="scale-label-r">👎 높음(의존적)</span>
+    </div>
+    <div class="scale-items">
+      <div class="si c1">
+        <div class="si-name">자료</div>
+        <div class="si-en">Data</div>
+        <div class="si-desc">단순 데이터 파라미터 전달</div>
+      </div>
+      <div class="si c2">
+        <div class="si-name">스탬프</div>
+        <div class="si-en">Stamp</div>
+        <div class="si-desc">배열·구조체 등 복합 자료구조 전달</div>
+      </div>
+      <div class="si c3">
+        <div class="si-name">제어</div>
+        <div class="si-en">Control</div>
+        <div class="si-desc">제어 신호(flag)를 전달하여 흐름 제어</div>
+      </div>
+      <div class="si c4">
+        <div class="si-name">외부</div>
+        <div class="si-en">External</div>
+        <div class="si-desc">외부 환경·형식·프로토콜에 의존</div>
+      </div>
+      <div class="si c5">
+        <div class="si-name">공통</div>
+        <div class="si-en">Common</div>
+        <div class="si-desc">전역 변수(Global Variable) 공유</div>
+      </div>
+      <div class="si c6">
+        <div class="si-name">내용</div>
+        <div class="si-en">Content</div>
+        <div class="si-desc">다른 모듈의 내부 변수·기능에 직접 접근</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story-box">
+    <div class="sl">💡 암기법 — 결합도 낮음→높음</div>
+    <p><strong>자스제외공내</strong> — <strong>자</strong>료 / <strong>스</strong>탬프 / <strong>제</strong>어 / <strong>외</strong>부 / <strong>공</strong>통 / <strong>내</strong>용<br>
+    "자스제외? 공내!!" — 자료부터 시작해서 내용이 가장 나쁜 것!</p>
+  </div>
+
+  <table class="ct" style="margin-top:16px;">
+    <thead><tr><th>유형</th><th>설명</th><th>기출 포인트</th></tr></thead>
+    <tbody>
+      <tr><td style="color:#4ade80;">자료 결합도</td><td>모듈 간에 단순 자료형(정수, 문자 등) 파라미터로만 데이터 전달</td><td>가장 낮음, 이상적</td></tr>
+      <tr><td style="color:#86efac;">스탬프 결합도</td><td>배열·구조체·객체 같은 복합 자료구조를 파라미터로 전달. 필요 없는 데이터까지 전달될 수 있음</td><td>★ 25년 1회</td></tr>
+      <tr><td style="color:#fde047;">제어 결합도</td><td>제어 신호(플래그, switch 값)를 전달하여 다른 모듈의 내부 논리 흐름을 제어</td><td>★★ 21년 3회, 24년 2회</td></tr>
+      <tr><td style="color:#fdba74;">외부 결합도</td><td>외부에서 도입된 데이터 형식, 통신 프로토콜, 디바이스 인터페이스 등을 공유</td><td>—</td></tr>
+      <tr><td style="color:#fb923c;">공통 결합도</td><td>여러 모듈이 전역 변수를 함께 참조·수정</td><td>★ 25년 1회</td></tr>
+      <tr><td style="color:#f87171;">내용 결합도</td><td>한 모듈이 다른 모듈 내부의 변수·기능에 직접 접근. 가장 나쁜 결합. 독립성 완전 파괴</td><td>★ 25년 1회, 가장 강함</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 3: 응집도 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <div class="section-title-wrap">
+      <div class="section-title">응집도 (Cohesion) — 높을수록 Good</div>
+      <div class="exam-badges">
+        <span class="badge-exam">20년 1회</span><span class="badge-exam">24년 1회</span><span class="badge-exam">24년 2회</span>
+      </div>
+    </div>
+  </div>
+  <div class="def-box"><p><strong>모듈 내부의 기능적인 집중 정도</strong>. 하나의 모듈이 하나의 기능에 집중할수록 응집도가 높다.</p></div>
+
+  <div class="scale-box">
+    <div class="scale-title">응집도 스펙트럼</div>
+    <div class="scale-sub">왼쪽(높음, 좋음) ──────────────── 오른쪽(낮음, 나쁨)</div>
+    <div class="scale-bar cohesion-bar">
+      <span class="scale-label-l">👍 높음(집중적)</span>
+      <span class="scale-label-r">👎 낮음(산만함)</span>
+    </div>
+    <div class="scale-items">
+      <div class="si h1">
+        <div class="si-name">기능</div>
+        <div class="si-en">Functional</div>
+        <div class="si-desc">단 하나의 기능만 수행</div>
+      </div>
+      <div class="si h2">
+        <div class="si-name">순차</div>
+        <div class="si-en">Sequential</div>
+        <div class="si-desc">이전 출력이 다음 입력으로 연결</div>
+      </div>
+      <div class="si h3">
+        <div class="si-name">교환/통신</div>
+        <div class="si-en">Communication</div>
+        <div class="si-desc">동일 데이터를 다루는 기능 묶음</div>
+      </div>
+      <div class="si h4">
+        <div class="si-name">절차</div>
+        <div class="si-en">Procedural</div>
+        <div class="si-desc">정해진 절차 순서대로 수행</div>
+      </div>
+      <div class="si h5">
+        <div class="si-name">시간</div>
+        <div class="si-en">Temporal</div>
+        <div class="si-desc">특정 시점에 함께 수행 (초기화 등)</div>
+      </div>
+      <div class="si h6">
+        <div class="si-name">논리</div>
+        <div class="si-en">Logical</div>
+        <div class="si-desc">논리적으로 비슷한 기능들 묶음</div>
+      </div>
+      <div class="si h7">
+        <div class="si-name">우연</div>
+        <div class="si-en">Coincidental</div>
+        <div class="si-desc">아무 관계 없이 우연히 묶인 것</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story-box">
+    <div class="sl">💡 암기법 — 응집도 높음→낮음</div>
+    <p><strong>기순교절시논우</strong> — <strong>기</strong>능 / <strong>순</strong>차 / <strong>교</strong>환 / <strong>절</strong>차 / <strong>시</strong>간 / <strong>논</strong>리 / <strong>우</strong>연<br>
+    "기순교절, 시논우~" — 기능이 가장 좋고 우연이 가장 나쁨!</p>
+  </div>
+
+  <div class="ex-box" style="margin-top:16px;">
+    <div class="ex-label">24년 2회 기출 — 순차적 응집도 설명</div>
+    <p style="font-size:13px;color:var(--dim);">"모듈 내부의 각 기능들이 서로 연관성을 가지고 순차적으로 수행되는 응집도. 하나의 작업이 끝나면 그 결과가 다음 작업의 입력으로 사용" → <strong style="color:var(--text)">순차적(Sequential) 응집도</strong></p>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">24년 1회 기출 — 높은 순 배열 (보기: ①기능 ②교환 ③우연 ④시간)</div>
+    <p style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text);">정답: ① 기능 &gt; ② 교환 &gt; ④ 시간 &gt; ③ 우연</p>
+  </div>
+</div>
+
+<!-- SECTION 4: 결합도 vs 응집도 순서 퀴즈 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <div class="section-title-wrap">
+      <div class="section-title">🎯 순서 배열 연습</div>
+    </div>
+  </div>
+  <div class="def-box"><p>칩을 클릭하여 아래 답안 영역으로 옮기세요. <strong>낮음(좋음) → 높음(나쁨)</strong> 순으로 배열하세요.</p></div>
+
+  <!-- 결합도 퀴즈 -->
+  <div class="rank-quiz">
+    <div class="rank-title">결합도 — 낮음(좋음)부터 높음(나쁨) 순서로</div>
+    <div class="rank-sub">아래 칩을 클릭해 답안 영역으로 이동하세요</div>
+
+    <div class="rank-section">
+      <div class="rank-label">선택 가능한 항목</div>
+      <div class="rank-chips" id="c-source">
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">내용</div>
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">제어</div>
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">자료</div>
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">공통</div>
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">스탬프</div>
+        <div class="rank-chip" onclick="moveChip(this,'c-drop')">외부</div>
+      </div>
+    </div>
+    <div class="rank-section">
+      <div class="rank-label">답안 영역 (낮음 → 높음)</div>
+      <div class="drop-zone" id="c-drop" onclick="handleDropZoneClick(event,'c-source')"></div>
+    </div>
+    <button class="rank-check-btn" onclick="checkRank('c-drop',['자료','스탬프','제어','외부','공통','내용'],'c-fb')">확인</button>
+    <button class="rank-reset-btn" onclick="resetRank('c-drop','c-source','c-fb')">초기화</button>
+    <div class="rank-fb" id="c-fb"></div>
+  </div>
+
+  <!-- 응집도 퀴즈 -->
+  <div class="rank-quiz">
+    <div class="rank-title">응집도 — 높음(좋음)부터 낮음(나쁨) 순서로</div>
+    <div class="rank-sub">아래 칩을 클릭해 답안 영역으로 이동하세요</div>
+
+    <div class="rank-section">
+      <div class="rank-label">선택 가능한 항목</div>
+      <div class="rank-chips" id="h-source">
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">우연</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">시간</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">기능</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">교환</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">논리</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">순차</div>
+        <div class="rank-chip" onclick="moveChip(this,'h-drop')">절차</div>
+      </div>
+    </div>
+    <div class="rank-section">
+      <div class="rank-label">답안 영역 (높음 → 낮음)</div>
+      <div class="drop-zone" id="h-drop" onclick="handleDropZoneClick(event,'h-source')"></div>
+    </div>
+    <button class="rank-check-btn" onclick="checkRank('h-drop',['기능','순차','교환','절차','시간','논리','우연'],'h-fb')">확인</button>
+    <button class="rank-reset-btn" onclick="resetRank('h-drop','h-source','h-fb')">초기화</button>
+    <div class="rank-fb" id="h-fb"></div>
+  </div>
+</div>
+
+<!-- SECTION 5: Fan-in / Fan-out -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <div class="section-title-wrap">
+      <div class="section-title">Fan-in / Fan-out</div>
+      <div class="exam-badges"><span class="badge-exam">20년 1회</span></div>
+    </div>
+  </div>
+  <div class="fan-grid">
+    <div class="fan-card" style="border-top:3px solid var(--blue);">
+      <div class="fan-title">📥 Fan-in</div>
+      <div class="fan-desc">어떤 모듈을 <strong style="color:#fff">호출하는</strong> 모듈의 수. 해당 모듈로 들어오는 화살표 수. <strong style="color:#fff">높을수록 재사용성↑</strong>이지만 과도하면 유지보수 복잡.</div>
+      <div class="fan-formula" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);">Fan-in = 나를 부르는 모듈 수</div>
+    </div>
+    <div class="fan-card" style="border-top:3px solid var(--orange);">
+      <div class="fan-title">📤 Fan-out</div>
+      <div class="fan-desc">어떤 모듈이 <strong style="color:#fff">호출하는</strong> 모듈의 수. 해당 모듈에서 나가는 화살표 수. <strong style="color:#fff">높을수록 결합도↑</strong>, 복잡도 증가.</div>
+      <div class="fan-formula" style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);">Fan-out = 내가 부르는 모듈 수</div>
+    </div>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">20년 1회 기출 — Fan-in 2 이상인 모듈 찾기</div>
+    <p style="font-size:13px;color:var(--dim);">모듈 구조도에서 <strong style="color:var(--text)">위에서 두 개 이상의 화살표가 들어오는 모듈</strong>을 찾는 문제. 여러 모듈에서 공통으로 호출되는 하위 모듈이 해당됨.</p>
+    <div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:12px;color:var(--dim);">
+      팁: Fan-in이 높은 모듈 = 공통으로 쓰이는 유틸리티 모듈 (좋은 설계)<br>
+      Fan-out이 높은 모듈 = 많은 것을 제어하는 복잡한 모듈 (주의 필요)
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>📝 실기 대비 문제</h2>
+    <p>빈칸을 채우고 채점하기를 눌러보세요</p>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 01</div>
+    <div class="q-text">모듈의 독립성을 판단하는 두 가지 지표를 쓰시오. (20년 1회 기출)<br>
+    ① 모듈과 모듈 간의 상호 의존 정도: <em>( ① )</em><br>
+    ② 모듈 내부의 기능적인 집중 정도: <em>( ② )</em><br>
+    → 독립성을 높이려면 ①을 <em>낮추고</em> ②를 <em>높여야</em> 한다.</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q1a" placeholder="①"><div class="fb" id="q1a-fb"></div></div>
+      <div><input class="blank" id="q1b" placeholder="②"><div class="fb" id="q1b-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 02</div>
+    <div class="q-text">두 모듈 사이에서 하나의 모듈이 다른 모듈의 <em>내부 논리 흐름을 제어하기 위해 특정 제어 신호를 전달</em>하는 결합도 유형은? (24년 2회 기출)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q2" placeholder="결합도 이름"><div class="fb" id="q2-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 03</div>
+    <div class="q-text">다음 3가지 결합도를 쓰시오. (25년 1회 기출)<br>
+    ① 다른 모듈 내부의 변수·기능에 <em>직접 접근</em>하는 가장 강한 결합도<br>
+    ② 배열·객체·구조체 같은 <em>복합 자료구조</em>를 파라미터로 전달<br>
+    ③ <em>전역 변수</em>를 여러 모듈이 함께 참조·수정</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q3a" placeholder="①"><div class="fb" id="q3a-fb"></div></div>
+      <div><input class="blank" id="q3b" placeholder="②"><div class="fb" id="q3b-fb"></div></div>
+      <div><input class="blank" id="q3c" placeholder="③"><div class="fb" id="q3c-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 04</div>
+    <div class="q-text">결합도를 <em>낮은(좋은) 순</em>서로 나열하시오. (자료 / 스탬프 / 제어 / 외부 / 공통 / 내용)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q4" placeholder="순서대로 작성 (→ 구분)"><div class="fb" id="q4-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 05</div>
+    <div class="q-text">응집도를 <em>높은(좋은) 순</em>서로 나열하시오. (기능/순차/교환/절차/시간/논리/우연)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q5" placeholder="순서대로 작성 (→ 구분)"><div class="fb" id="q5-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 06</div>
+    <div class="q-text">모듈 내부의 각 기능들이 <em>순차적으로 수행</em>되며, 이전 작업의 출력이 다음 작업의 입력으로 사용되는 응집도 유형은? (24년 2회 기출)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q6" placeholder="응집도 이름"><div class="fb" id="q6-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 07</div>
+    <div class="q-text">어떤 모듈을 <em>호출하는</em> 모듈의 수를 무엇이라 하는가? 재사용성이 높은 모듈은 이 값이 높다.</div>
+    <div class="blank-row"><div><input class="blank" id="q7" placeholder="정답 입력"><div class="fb" id="q7-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 08</div>
+    <div class="q-text">UI와 비즈니스 로직을 분리하여 <em>Model + View + Controller</em> 3가지로 구성하는 아키텍처 패턴은?</div>
+    <div class="blank-row"><div><input class="blank" id="q8" placeholder="정답 입력"><div class="fb" id="q8-fb"></div></div></div>
+  </div>
+
+  <button class="grade-btn" onclick="grade()">채점하기</button>
+  <div class="score-box" id="score-box">
+    <div class="score-num" id="score-num">0/11</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">정답 수</div>
+    <br><button class="retry-btn" onclick="retry()">다시 풀기</button>
+  </div>
+</div>
+
+</div>
+<script>
+window.addEventListener('scroll',()=>{
+  document.getElementById('prog-bar').style.width=Math.min((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100,100)+'%';
+});
+
+// 순서 퀴즈
+function moveChip(chip, targetId){
+  document.getElementById(targetId).appendChild(chip);
+}
+function handleDropZoneClick(e, sourceId){
+  const chip = e.target.closest('.rank-chip');
+  if(chip) document.getElementById(sourceId).appendChild(chip);
+}
+function checkRank(dropId, correctOrder, fbId){
+  const chips = Array.from(document.querySelectorAll(`#${dropId} .rank-chip`));
+  const fb = document.getElementById(fbId);
+  if(chips.length !== correctOrder.length){
+    fb.textContent = `✗ ${correctOrder.length}개를 모두 배치해주세요. (현재 ${chips.length}개)`;
+    fb.className='rank-fb no'; return;
+  }
+  let correct = true;
+  chips.forEach((c,i)=>{
+    c.classList.remove('correct-chip','wrong-chip');
+    if(c.textContent.trim()===correctOrder[i]) c.classList.add('correct-chip');
+    else{ c.classList.add('wrong-chip'); correct=false; }
+  });
+  if(correct){ fb.textContent='✓ 정답! 완벽합니다!'; fb.className='rank-fb ok'; }
+  else{ fb.textContent='✗ 틀린 항목이 있습니다. 빨간색을 확인하세요.'; fb.className='rank-fb no'; }
+}
+function resetRank(dropId, sourceId, fbId){
+  const chips = Array.from(document.querySelectorAll(`#${dropId} .rank-chip`));
+  const src = document.getElementById(sourceId);
+  chips.forEach(c=>{ c.classList.remove('correct-chip','wrong-chip'); src.appendChild(c); });
+  document.getElementById(fbId).textContent='';
+}
+
+// Quiz
+const ANS={
+  q1a:['결합도','coupling'],q1b:['응집도','cohesion'],
+  q2:['제어 결합도','control coupling','제어결합도'],
+  q3a:['내용 결합도','content coupling','내용결합도'],
+  q3b:['스탬프 결합도','stamp coupling','스탬프결합도'],
+  q3c:['공통 결합도','common coupling','공통결합도'],
+  q4:['자료→스탬프→제어→외부→공통→내용','자료>스탬프>제어>외부>공통>내용','자료스탬프제어외부공통내용'],
+  q5:['기능→순차→교환→절차→시간→논리→우연','기능>순차>교환>절차>시간>논리>우연','기능순차교환절차시간논리우연'],
+  q6:['순차적 응집도','sequential cohesion','순차 응집도','순차적(sequential)응집도'],
+  q7:['fan-in','팬인','fan in'],
+  q8:['mvc','model-view-controller','모델-뷰-컨트롤러'],
+};
+const WIDE=['q2','q4','q5','q6'];
+function check(id,ans){
+  const el=document.getElementById(id),fb=document.getElementById(id+'-fb');
+  const v=el.value.trim().toLowerCase().replace(/\s+/g,'');
+  const ok=ans.some(a=>v===a.toLowerCase().replace(/\s+/g,''));
+  el.classList.toggle('correct',ok);el.classList.toggle('wrong',!ok);
+  if(ok){fb.textContent='✓ 정답';fb.className='fb ok';}
+  else{fb.textContent='✗ '+ans[0];fb.className='fb no';}
+  return ok;
+}
+function grade(){
+  let c=0;for(const[id,ans]of Object.entries(ANS))if(check(id,ans))c++;
+  const sb=document.getElementById('score-box');
+  document.getElementById('score-num').textContent=c+'/'+Object.keys(ANS).length;
+  sb.classList.add('show');sb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function retry(){
+  Object.keys(ANS).forEach(id=>{
+    const el=document.getElementById(id);el.value='';
+    el.className='blank'+(WIDE.includes(id)?' wide':'');
+    document.getElementById(id+'-fb').textContent='';
+  });
+  document.getElementById('score-box').classList.remove('show');
+}
+</script>
+</body>
+</html>

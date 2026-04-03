@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI 7계층 — 정보처리기사 실기</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1c2333;
+  --border:#252d40;--border2:#2d3a55;
+  --text:#e2e8f0;--dim:#94a3b8;--muted:#475569;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;
+  --yellow:#eab308;--teal:#14b8a6;--orange:#f97316;--purple:#a855f7;
+  /* 계층별 색상 */
+  --l7:#a855f7;--l6:#ec4899;--l5:#f97316;
+  --l4:#eab308;--l3:#22c55e;--l2:#3b82f6;--l1:#64748b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.75;}
+#prog-bar{position:fixed;top:0;left:0;height:3px;background:var(--green);width:0%;z-index:999;transition:width .1s;}
+.page{max-width:740px;margin:0 auto;padding:0 20px 80px;}
+.page-header{padding:40px 0 32px;border-bottom:1px solid var(--border);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-decoration:none;font-family:'Space Mono',monospace;margin-bottom:20px;transition:color .15s;}
+.back-btn:hover{color:var(--green);}
+.ch-badge{font-family:'Space Mono',monospace;font-size:11px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+h1.page-title{font-size:30px;font-weight:700;color:#fff;margin-top:12px;line-height:1.2;}
+.page-meta{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.meta-item{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.tag{font-size:11px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);padding:2px 8px;border-radius:10px;}
+
+/* 요약표 */
+.summary-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:13px;}
+.summary-table th{background:var(--bg3);border:1px solid var(--border);padding:9px 13px;color:var(--green);font-weight:700;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.5px;text-align:left;}
+.summary-table td{border:1px solid var(--border);padding:9px 13px;color:var(--dim);vertical-align:middle;line-height:1.5;}
+.summary-table td:first-child{font-family:'Space Mono',monospace;font-weight:700;text-align:center;white-space:nowrap;}
+code.inline{font-family:'Space Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:3px;color:var(--teal);}
+
+/* SECTION */
+.section{padding:40px 0;border-bottom:1px solid var(--border);}
+.section-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.section-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);min-width:28px;margin-top:2px;}
+.section-title{font-size:20px;font-weight:700;color:#fff;line-height:1.3;}
+.exam-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.badge-exam{font-size:11px;padding:2px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;background:#4c0519;color:#fca5a5;border:1px solid rgba(252,165,165,.2);}
+
+.def-box{border-left:3px solid var(--green);background:rgba(34,197,94,.05);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+.def-box p{font-size:14px;color:var(--text);line-height:1.7;}
+.def-box strong{color:var(--green);}
+
+.story-box{background:rgba(234,179,8,.04);border:1px solid rgba(234,179,8,.18);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.story-box .sl{font-size:11px;color:var(--yellow);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.story-box p{font-size:13px;color:var(--dim);line-height:1.7;}
+.story-box strong{color:var(--yellow);}
+
+/* OSI 계층 시각화 다이어그램 */
+.osi-diagram{margin:20px 0;}
+.osi-layer{display:flex;align-items:stretch;margin-bottom:3px;border-radius:6px;overflow:hidden;border:1px solid var(--border);transition:transform .15s;}
+.osi-layer:hover{transform:translateX(4px);}
+.osi-num{width:36px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+.osi-name-block{width:130px;padding:12px 14px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);}
+.osi-name-ko{font-weight:700;font-size:13px;color:#fff;}
+.osi-name-en{font-family:'Space Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;}
+.osi-unit{width:64px;padding:12px 10px;text-align:center;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;}
+.osi-unit span{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);}
+.osi-detail{flex:1;padding:12px 14px;font-size:12px;color:var(--dim);line-height:1.6;}
+.osi-proto{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.proto-tag{font-family:'Space Mono',monospace;font-size:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:1px 7px;border-radius:10px;}
+
+/* CT TABLE */
+.ct{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;}
+.ct th{background:var(--bg3);border:1px solid var(--border);padding:9px 13px;color:var(--dim);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-align:left;}
+.ct td{border:1px solid var(--border);padding:9px 13px;color:var(--dim);vertical-align:top;line-height:1.6;}
+.ct td:first-child{font-weight:700;color:var(--text);white-space:nowrap;}
+.ct tr:hover td{background:rgba(255,255,255,.015);}
+
+/* 계층 카드 (개별 설명) */
+.layer-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.layer-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.layer-num-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;}
+.layer-name{flex:1;}
+.layer-name-ko{font-weight:700;font-size:15px;color:#fff;}
+.layer-name-en{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.layer-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.unit-badge{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--dim);}
+.layer-body{padding:14px 18px;}
+.layer-body p{font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:8px;}
+.layer-body p:last-child{margin-bottom:0;}
+.layer-body strong{color:var(--text);}
+.layer-proto-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.lp{font-family:'Space Mono',monospace;font-size:11px;padding:3px 9px;border-radius:10px;border:1px solid;}
+.lp-equip{background:rgba(251,146,60,.08);border-color:rgba(251,146,60,.2);color:#fdba74;}
+.lp-proto{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#93c5fd;}
+.ex-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.ex-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+
+/* TCP vs UDP */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+.cmp-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.cmp-name{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.cmp-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim);padding:5px 0;border-bottom:1px solid var(--border);}
+.cmp-row:last-child{border-bottom:none;}
+.cmp-row span:last-child{color:var(--text);font-weight:700;font-size:12px;}
+.cmp-badge{font-size:10px;font-family:'Space Mono',monospace;padding:2px 8px;border-radius:10px;}
+.tcp-b{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#93c5fd;}
+.udp-b{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#fdba74;}
+
+/* QUIZ */
+.quiz-section{padding:40px 0 0;}
+.quiz-header{margin-bottom:24px;}
+.quiz-header h2{font-size:20px;font-weight:700;color:#fff;}
+.quiz-header p{font-size:13px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;}
+.quiz-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:12px;}
+.q-num{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:var(--green);color:#fff;padding:2px 8px;border-radius:3px;margin-bottom:10px;}
+.q-text{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.q-text em{font-style:normal;background:rgba(34,197,94,.1);border-bottom:2px solid var(--green);padding:1px 4px;border-radius:2px;color:var(--green);}
+.blank-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.blank{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:14px;padding:8px 12px;border-radius:5px;width:180px;font-family:'Space Mono',monospace;transition:border-color .15s;outline:none;}
+.blank.wide{width:260px;}
+.blank:focus{border-color:var(--green);}
+.blank.correct{border-color:var(--green)!important;background:rgba(34,197,94,.06);}
+.blank.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.06);}
+.fb{font-size:12px;font-family:'Space Mono',monospace;margin-top:4px;}
+.fb.ok{color:var(--green);}.fb.no{color:var(--red);}
+.q-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;font-family:'Space Mono',monospace;}
+.q-table th{background:#0a2240;border:1px solid #1e3a5f;padding:7px 10px;color:#93c5fd;}
+.q-table td{border:1px solid #1e2d40;padding:7px 10px;color:#cdd9e5;}
+.grade-btn{display:block;width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .15s;font-family:'Noto Sans KR',sans-serif;}
+.grade-btn:hover{opacity:.85;}
+.score-box{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:14px;text-align:center;}
+.score-box.show{display:block;}
+.score-num{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--green);}
+.retry-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 20px;border-radius:5px;cursor:pointer;font-size:13px;margin-top:12px;font-family:'Noto Sans KR',sans-serif;}
+
+@media(max-width:600px){
+  .page{padding:0 16px 60px;}
+  h1.page-title{font-size:24px;}
+  .section{padding:28px 0;}
+  .section-title{font-size:17px;}
+  .osi-unit{display:none;}
+  .osi-name-block{width:110px;}
+  .compare-grid{grid-template-columns:1fr;}
+  .summary-table,.ct{display:block;overflow-x:auto;}
+  .blank,.blank.wide{width:100%;max-width:280px;}
+  .layer-card-head{flex-wrap:wrap;gap:8px;}
+}
+</style>
+</head>
+<body>
+<div id="prog-bar"></div>
+<div class="page">
+
+<!-- HEADER -->
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Study Hub</a>
+  <div><span class="ch-badge">Ch 04 · 네트워크</span></div>
+  <h1 class="page-title">OSI 7계층<br>Open System Interconnection</h1>
+  <div class="page-meta">
+    <span class="meta-item">⏱ 약 10분</span>
+    <span class="tag">계층별 역할</span>
+    <span class="tag">프로토콜</span>
+    <span class="tag">장비</span>
+    <span class="tag">TCP vs UDP</span>
+  </div>
+</div>
+
+<!-- 요약표 -->
+<div class="section" style="padding-top:28px;">
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;font-family:'Space Mono',monospace;">▸ 전체 요약 — 설명을 보고 계층 번호·이름을 맞히는 게 핵심!</p>
+
+  <!-- OSI 계층 시각적 다이어그램 -->
+  <div class="osi-diagram">
+    <div class="osi-layer" style="background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2);">
+      <div class="osi-num" style="background:rgba(168,85,247,.2);color:var(--l7);">7</div>
+      <div class="osi-name-block"><div class="osi-name-ko">응용 계층</div><div class="osi-name-en">Application</div></div>
+      <div class="osi-unit"><span>데이터</span></div>
+      <div class="osi-detail">사용자와 직접 상호작용. 응용 서비스 제공
+        <div class="osi-proto"><span class="proto-tag">HTTP</span><span class="proto-tag">FTP</span><span class="proto-tag">SMTP</span><span class="proto-tag">DNS</span><span class="proto-tag">TELNET</span><span class="proto-tag">SNMP</span><span class="proto-tag">DHCP</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(236,72,153,.08);border-color:rgba(236,72,153,.2);">
+      <div class="osi-num" style="background:rgba(236,72,153,.2);color:var(--l6);">6</div>
+      <div class="osi-name-block"><div class="osi-name-ko">표현 계층</div><div class="osi-name-en">Presentation</div></div>
+      <div class="osi-unit"><span>데이터</span></div>
+      <div class="osi-detail">데이터 형식 변환·암호화·압축. 독립성 제공
+        <div class="osi-proto"><span class="proto-tag">JPEG</span><span class="proto-tag">MPEG</span><span class="proto-tag">GIF</span><span class="proto-tag">SSL/TLS</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.2);">
+      <div class="osi-num" style="background:rgba(249,115,22,.2);color:var(--l5);">5</div>
+      <div class="osi-name-block"><div class="osi-name-ko">세션 계층</div><div class="osi-name-en">Session</div></div>
+      <div class="osi-unit"><span>데이터</span></div>
+      <div class="osi-detail">통신 세션 설정·유지·종료. 대화 제어
+        <div class="osi-proto"><span class="proto-tag">SSH</span><span class="proto-tag">TLS</span><span class="proto-tag">NetBIOS</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(234,179,8,.08);border-color:rgba(234,179,8,.2);">
+      <div class="osi-num" style="background:rgba(234,179,8,.2);color:var(--l4);">4</div>
+      <div class="osi-name-block"><div class="osi-name-ko">전송 계층</div><div class="osi-name-en">Transport</div></div>
+      <div class="osi-unit"><span>세그먼트</span></div>
+      <div class="osi-detail">종단간(End-to-End) 신뢰성 있는 데이터 전송. 흐름·오류 제어
+        <div class="osi-proto"><span class="proto-tag">TCP</span><span class="proto-tag">UDP</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);">
+      <div class="osi-num" style="background:rgba(34,197,94,.2);color:var(--l3);">3</div>
+      <div class="osi-name-block"><div class="osi-name-ko">네트워크 계층</div><div class="osi-name-en">Network</div></div>
+      <div class="osi-unit"><span>패킷</span></div>
+      <div class="osi-detail">데이터를 목적지까지 최적 경로로 전달. IP 주소 기반 라우팅
+        <div class="osi-proto"><span class="proto-tag">IP</span><span class="proto-tag">ICMP</span><span class="proto-tag">ARP</span><span class="proto-tag">RARP</span><span class="proto-tag">OSPF</span><span class="proto-tag">라우터</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);">
+      <div class="osi-num" style="background:rgba(59,130,246,.2);color:var(--l2);">2</div>
+      <div class="osi-name-block"><div class="osi-name-ko">데이터링크 계층</div><div class="osi-name-en">Data Link</div></div>
+      <div class="osi-unit"><span>프레임</span></div>
+      <div class="osi-detail">물리 계층 오류 감지·수정. MAC 주소 기반. CRC 오류 제어
+        <div class="osi-proto"><span class="proto-tag">Ethernet</span><span class="proto-tag">PPP</span><span class="proto-tag">스위치</span><span class="proto-tag">브리지</span></div>
+      </div>
+    </div>
+    <div class="osi-layer" style="background:rgba(100,116,139,.08);border-color:rgba(100,116,139,.2);">
+      <div class="osi-num" style="background:rgba(100,116,139,.2);color:var(--l1);">1</div>
+      <div class="osi-name-block"><div class="osi-name-ko">물리 계층</div><div class="osi-name-en">Physical</div></div>
+      <div class="osi-unit"><span>비트</span></div>
+      <div class="osi-detail">전기적 신호로 데이터 전송. 0과 1의 비트 스트림. 오류 처리 없음
+        <div class="osi-proto"><span class="proto-tag">케이블</span><span class="proto-tag">리피터</span><span class="proto-tag">허브</span><span class="proto-tag">랜카드</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story-box">
+    <div class="sl">💡 암기법 — 계층 순서 (7→1)</div>
+    <p><strong>아파서 다리를 데리고 네트워크 전송에 갔다</strong><br>
+    <strong>아</strong>플리케이션 → <strong>파</strong>레젠테이션 → <strong>세</strong>션 → <strong>다</strong>리(전송) → <strong>네</strong>트워크 → <strong>데</strong>이터링크 → <strong>물</strong>리</p>
+  </div>
+</div>
+
+<!-- SECTION 1: 계층별 상세 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <div class="section-title-wrap">
+      <div class="section-title">계층별 상세 설명</div>
+      <div class="exam-badges">
+        <span class="badge-exam">20년 1회</span><span class="badge-exam">21년 3회</span>
+        <span class="badge-exam">22년 1회</span><span class="badge-exam">23년 1회</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 응용 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(168,85,247,.2);color:var(--l7);">7</div>
+      <div class="layer-name"><div class="layer-name-ko">응용 계층 (Application Layer)</div><div class="layer-name-en">전송 단위: 데이터(Data)</div></div>
+      <div class="layer-badges"><span class="unit-badge">사용자와 직접 상호작용</span></div>
+    </div>
+    <div class="layer-body">
+      <p>네트워크 서비스와 사용자 사이의 인터페이스를 제공하는 계층. 우리가 일상에서 사용하는 <strong>웹 브라우저, 이메일, 파일 전송</strong>이 모두 이 계층에서 동작한다.</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">HTTP — 웹 (80)</span>
+        <span class="lp lp-proto">HTTPS — 보안 웹 (443)</span>
+        <span class="lp lp-proto">FTP — 파일 전송 (20/21)</span>
+        <span class="lp lp-proto">SMTP — 이메일 발송 (25)</span>
+        <span class="lp lp-proto">DNS — 도메인 → IP (53)</span>
+        <span class="lp lp-proto">TELNET — 원격 접속 (23)</span>
+        <span class="lp lp-proto">SNMP — 네트워크 관리 (161)</span>
+        <span class="lp lp-proto">DHCP — IP 자동 할당 (67/68)</span>
+        <span class="lp lp-proto">POP3 — 이메일 수신 (110)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 표현 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(236,72,153,.2);color:var(--l6);">6</div>
+      <div class="layer-name"><div class="layer-name-ko">표현 계층 (Presentation Layer)</div><div class="layer-name-en">전송 단위: 데이터(Data)</div></div>
+    </div>
+    <div class="layer-body">
+      <p>데이터의 <strong>형식 변환·암호화·압축</strong>을 담당. 서로 다른 데이터 표현 방식을 사용하는 응용 프로세스에 <strong>독립성을 제공</strong>하고 암호화한다.</p>
+      <p>▸ 기출 포인트: <strong>"데이터 표현이 상이한 응용 프로세스의 독립성을 제공하고, 암호화한다"</strong> → 표현 계층</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">JPEG / GIF / PNG — 이미지 형식</span>
+        <span class="lp lp-proto">MPEG — 동영상 압축</span>
+        <span class="lp lp-proto">SSL/TLS — 암호화</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 세션 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(249,115,22,.2);color:var(--l5);">5</div>
+      <div class="layer-name"><div class="layer-name-ko">세션 계층 (Session Layer)</div><div class="layer-name-en">전송 단위: 데이터(Data)</div></div>
+    </div>
+    <div class="layer-body">
+      <p>두 시스템 간의 통신 <strong>세션(연결)을 설정·유지·종료</strong>하는 계층. 대화 제어와 동기화를 담당한다.</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">SSH — 보안 원격 접속</span>
+        <span class="lp lp-proto">TLS — 전송 보안</span>
+        <span class="lp lp-proto">NetBIOS — 네트워크 서비스</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 전송 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(234,179,8,.2);color:var(--l4);">4</div>
+      <div class="layer-name"><div class="layer-name-ko">전송 계층 (Transport Layer)</div><div class="layer-name-en">전송 단위: 세그먼트(Segment)</div></div>
+      <div class="layer-badges"><span class="unit-badge" style="background:rgba(234,179,8,.08);border-color:rgba(234,179,8,.2);color:#fde047;">★★★ 빈출</span></div>
+    </div>
+    <div class="layer-body">
+      <p><strong>종단간(End-to-End) 신뢰성 있는 데이터 전송</strong>을 보장. 흐름 제어·오류 제어·분할·재조합을 담당. <strong>포트 번호</strong>를 사용하여 프로세스를 식별.</p>
+      <p>▸ 기출 포인트: <strong>"포인트 투 포인트의 신뢰성 있는 데이터 전송을 보장하며, 물리 계층의 오류를 감지하고 수정한다"</strong> → 데이터링크 계층 (헷갈림 주의!)</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">TCP — 신뢰성, 연결 지향</span>
+        <span class="lp lp-proto">UDP — 비신뢰성, 빠름</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 네트워크 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(34,197,94,.2);color:var(--l3);">3</div>
+      <div class="layer-name"><div class="layer-name-ko">네트워크 계층 (Network Layer)</div><div class="layer-name-en">전송 단위: 패킷(Packet)</div></div>
+      <div class="layer-badges"><span class="unit-badge" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);color:#4ade80;">★★★ 빈출</span></div>
+    </div>
+    <div class="layer-body">
+      <p>데이터를 목적지까지 <strong>가장 안전하고 빠르게 전달</strong>하는 기능. <strong>IP 주소</strong>를 기반으로 최적의 경로(라우팅)를 결정한다.</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">IP — 인터넷 프로토콜</span>
+        <span class="lp lp-proto">ICMP — 오류/상태 보고</span>
+        <span class="lp lp-proto">ARP — IP → MAC 변환</span>
+        <span class="lp lp-proto">RARP — MAC → IP 변환</span>
+        <span class="lp lp-proto">IGMP — 멀티캐스트 관리</span>
+        <span class="lp lp-proto">OSPF — 링크 상태 라우팅</span>
+        <span class="lp lp-equip">라우터</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 데이터링크 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(59,130,246,.2);color:var(--l2);">2</div>
+      <div class="layer-name"><div class="layer-name-ko">데이터링크 계층 (Data Link Layer)</div><div class="layer-name-en">전송 단위: 프레임(Frame)</div></div>
+      <div class="layer-badges"><span class="unit-badge" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#93c5fd;">★★★ 빈출</span></div>
+    </div>
+    <div class="layer-body">
+      <p>물리 계층에서 발생할 수 있는 <strong>오류를 감지하고 수정</strong>하여 신뢰성 있는 데이터 전송 보장. <strong>MAC 주소</strong>(물리 주소) 기반. <strong>CRC(Cyclic Redundancy Check)</strong>로 오류 감지.</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-proto">Ethernet — LAN 표준</span>
+        <span class="lp lp-proto">PPP — 점대점 연결</span>
+        <span class="lp lp-equip">스위치</span>
+        <span class="lp lp-equip">브리지</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 물리 -->
+  <div class="layer-card">
+    <div class="layer-card-head">
+      <div class="layer-num-badge" style="background:rgba(100,116,139,.2);color:var(--l1);">1</div>
+      <div class="layer-name"><div class="layer-name-ko">물리 계층 (Physical Layer)</div><div class="layer-name-en">전송 단위: 비트(Bit)</div></div>
+    </div>
+    <div class="layer-body">
+      <p>데이터를 <strong>전기적 신호(비트)</strong>로 변환하여 통신 매체(케이블)를 통해 전송. 0과 1로만 구성. 데이터의 내용이나 오류는 처리하지 않음.</p>
+      <div class="layer-proto-row">
+        <span class="lp lp-equip">통신 케이블</span>
+        <span class="lp lp-equip">랜카드(NIC)</span>
+        <span class="lp lp-equip">리피터</span>
+        <span class="lp lp-equip">허브</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: 전송단위 & 장비 정리 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <div class="section-title-wrap">
+      <div class="section-title">계층별 전송 단위 · 장비 · 프로토콜</div>
+      <div class="exam-badges">
+        <span class="badge-exam">21년 3회</span><span class="badge-exam">23년 1회</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="ct">
+    <thead>
+      <tr><th>계층</th><th>이름</th><th>전송 단위</th><th>주요 장비</th><th>주요 프로토콜</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--l7);">7층</td><td>응용</td><td>데이터</td><td>—</td><td>HTTP, FTP, SMTP, DNS, DHCP</td></tr>
+      <tr><td style="color:var(--l6);">6층</td><td>표현</td><td>데이터</td><td>—</td><td>JPEG, MPEG, SSL</td></tr>
+      <tr><td style="color:var(--l5);">5층</td><td>세션</td><td>데이터</td><td>—</td><td>SSH, TLS, NetBIOS</td></tr>
+      <tr><td style="color:var(--l4);">4층</td><td>전송</td><td><strong style="color:var(--text)">세그먼트</strong></td><td>—</td><td>TCP, UDP</td></tr>
+      <tr><td style="color:var(--l3);">3층</td><td>네트워크</td><td><strong style="color:var(--text)">패킷</strong></td><td><strong style="color:var(--text)">라우터</strong></td><td>IP, ICMP, ARP, OSPF</td></tr>
+      <tr><td style="color:var(--l2);">2층</td><td>데이터링크</td><td><strong style="color:var(--text)">프레임</strong></td><td><strong style="color:var(--text)">스위치, 브리지</strong></td><td>Ethernet, PPP</td></tr>
+      <tr><td style="color:var(--l1);">1층</td><td>물리</td><td><strong style="color:var(--text)">비트</strong></td><td><strong style="color:var(--text)">허브, 리피터</strong></td><td>케이블, NIC</td></tr>
+    </tbody>
+  </table>
+
+  <div class="story-box">
+    <div class="sl">💡 장비 암기법</div>
+    <p>
+      <strong>1층(물리) = 허브·리피터</strong> — 신호만 증폭, 목적지 모름<br>
+      <strong>2층(데이터링크) = 스위치·브리지</strong> — MAC 주소로 판단<br>
+      <strong>3층(네트워크) = 라우터</strong> — IP 주소로 최적 경로 결정
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 3: TCP vs UDP -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <div class="section-title-wrap">
+      <div class="section-title">TCP vs UDP</div>
+      <div class="exam-badges">
+        <span class="badge-exam">20년 1회</span><span class="badge-exam">24년 3회</span>
+        <span class="badge-exam">25년 1회</span>
+      </div>
+    </div>
+  </div>
+  <div class="def-box"><p>둘 다 <strong>4계층(전송 계층)</strong> 프로토콜. TCP는 신뢰성, UDP는 속도가 핵심.</p></div>
+
+  <div class="compare-grid">
+    <div class="cmp-card" style="border-top:3px solid var(--blue);">
+      <div class="cmp-name">TCP</div>
+      <div class="cmp-sub">Transmission Control Protocol</div>
+      <div class="cmp-row"><span>연결 방식</span><span><span class="cmp-badge tcp-b">연결 지향</span></span></div>
+      <div class="cmp-row"><span>신뢰성</span><span>보장 (재전송)</span></div>
+      <div class="cmp-row"><span>흐름 제어</span><span>있음</span></div>
+      <div class="cmp-row"><span>순서 보장</span><span>있음</span></div>
+      <div class="cmp-row"><span>속도</span><span>느림</span></div>
+      <div class="cmp-row"><span>헤더 크기</span><span>20~60 Byte</span></div>
+      <div class="cmp-row"><span>사용 예</span><span>HTTP, FTP, SMTP</span></div>
+    </div>
+    <div class="cmp-card" style="border-top:3px solid var(--orange);">
+      <div class="cmp-name">UDP</div>
+      <div class="cmp-sub">User Datagram Protocol</div>
+      <div class="cmp-row"><span>연결 방식</span><span><span class="cmp-badge udp-b">비연결 지향</span></span></div>
+      <div class="cmp-row"><span>신뢰성</span><span>미보장 (재전송 없음)</span></div>
+      <div class="cmp-row"><span>흐름 제어</span><span>없음</span></div>
+      <div class="cmp-row"><span>순서 보장</span><span>없음</span></div>
+      <div class="cmp-row"><span>속도</span><span>빠름</span></div>
+      <div class="cmp-row"><span>헤더 크기</span><span>8 Byte</span></div>
+      <div class="cmp-row"><span>사용 예</span><span>DNS, SNMP, DHCP, 스트리밍</span></div>
+    </div>
+  </div>
+
+  <div class="story-box">
+    <div class="sl">💡 암기법</div>
+    <p><strong>TCP = 택배</strong> — 받은 사람이 서명(ACK)해야 하고, 안 오면 다시 보냄<br>
+    <strong>UDP = 전단지</strong> — 그냥 뿌리고 끝. 받았는지 확인 안 함. 대신 빠름</p>
+  </div>
+</div>
+
+<!-- SECTION 4: 주요 프로토콜 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <div class="section-title-wrap">
+      <div class="section-title">자주 나오는 프로토콜 정리</div>
+      <div class="exam-badges">
+        <span class="badge-exam">21년 3회</span><span class="badge-exam">23년 1회</span>
+        <span class="badge-exam">24년 3회</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="ct">
+    <thead><tr><th>프로토콜</th><th>계층</th><th>포트</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>HTTP</td><td>7 응용</td><td>80</td><td>웹 페이지 전송</td></tr>
+      <tr><td>HTTPS</td><td>7 응용</td><td>443</td><td>SSL/TLS 기반 암호화 HTTP</td></tr>
+      <tr><td>FTP</td><td>7 응용</td><td>20(데이터), 21(제어)</td><td>파일 전송</td></tr>
+      <tr><td>SMTP</td><td>7 응용</td><td>25</td><td>이메일 <strong style="color:var(--text)">발송</strong></td></tr>
+      <tr><td>POP3</td><td>7 응용</td><td>110</td><td>이메일 <strong style="color:var(--text)">수신</strong></td></tr>
+      <tr><td>DNS</td><td>7 응용</td><td>53</td><td>도메인명 → IP 주소 변환 (UDP 사용)</td></tr>
+      <tr><td>DHCP</td><td>7 응용</td><td>67/68</td><td>IP 주소 자동 할당</td></tr>
+      <tr><td>SNMP</td><td>7 응용</td><td>161/162</td><td>네트워크 장비 관리·모니터링</td></tr>
+      <tr><td>TELNET</td><td>7 응용</td><td>23</td><td>원격 접속 (비암호화)</td></tr>
+      <tr><td>TCP</td><td>4 전송</td><td>—</td><td>연결 지향, 신뢰성 보장</td></tr>
+      <tr><td>UDP</td><td>4 전송</td><td>—</td><td>비연결 지향, 빠름</td></tr>
+      <tr><td>IP</td><td>3 네트워크</td><td>—</td><td>비신뢰성·비연결성 패킷 전달</td></tr>
+      <tr><td style="color:#fca5a5">ICMP</td><td>3 네트워크</td><td>—</td><td>네트워크 오류 보고·진단 (ping 명령)</td></tr>
+      <tr><td style="color:#fca5a5">ARP</td><td>3 네트워크</td><td>—</td><td><strong style="color:var(--text)">IP 주소 → MAC 주소</strong> 변환</td></tr>
+      <tr><td>RARP</td><td>3 네트워크</td><td>—</td><td><strong style="color:var(--text)">MAC 주소 → IP 주소</strong> 변환</td></tr>
+      <tr><td>OSPF</td><td>3 네트워크</td><td>—</td><td>링크 상태 라우팅 프로토콜. 다익스트라 알고리즘</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ex-box">
+    <div class="ex-label">⚠️ ICMP 기출 포인트 (23년 1회)</div>
+    <p style="font-size:13px;color:var(--dim);">ICMP: <strong style="color:var(--text)">네트워크 오류 메시지 전송·상태 진단용</strong> 프로토콜. 일반 데이터 전송에는 사용하지 않음. TCP, UDP와 함께 동작. ping 명령이 ICMP를 사용함.</p>
+  </div>
+
+  <div class="ex-box" style="margin-top:10px;">
+    <div class="ex-label">⚠️ ARP vs RARP 혼동 주의</div>
+    <p style="font-size:13px;color:var(--dim);">
+      <strong style="color:var(--text)">ARP</strong> = IP 주소를 알 때 → MAC 주소 알아내기<br>
+      <strong style="color:var(--text)">RARP</strong> = MAC 주소를 알 때 → IP 주소 알아내기
+    </p>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>📝 실기 대비 문제</h2>
+    <p>빈칸을 채우고 채점하기를 눌러보세요</p>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 01</div>
+    <div class="q-text">OSI 7 계층 모델 중 다음 설명에 해당하는 계층 이름을 쓰시오.<br>
+    <em>전기적, 기계적 특성을 이용해 통신 케이블로 데이터를 전송. 통신 단위는 비트(0과 1)이며, 데이터 내용이나 오류는 처리하지 않는다.</em></div>
+    <div class="blank-row"><div><input class="blank" id="q1" placeholder="계층 이름"><div class="fb" id="q1-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 02</div>
+    <div class="q-text">다음 ①~③에 해당하는 OSI 계층을 쓰시오. (21년 3회 기출)
+    <br>① <em>포인트 투 포인트의 신뢰성 있는 데이터 전송을 보장하며, 물리 계층의 오류를 감지하고 수정한다.</em>
+    <br>② <em>데이터를 목적지까지 가장 안전하고 빠르게 전달하는 기능</em>
+    <br>③ <em>데이터 표현이 상이한 응용 프로세스의 독립성을 제공하고, 암호화한다.</em></div>
+    <div class="blank-row">
+      <div><input class="blank" id="q2a" placeholder="①"><div class="fb" id="q2a-fb"></div></div>
+      <div><input class="blank" id="q2b" placeholder="②"><div class="fb" id="q2b-fb"></div></div>
+      <div><input class="blank" id="q2c" placeholder="③"><div class="fb" id="q2c-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 03</div>
+    <div class="q-text">네트워크 오류 메시지를 전송하고 네트워크 상태를 진단하는 프로토콜로, ping 명령에 사용되는 프로토콜 약어는? (23년 1회 기출)</div>
+    <div class="blank-row"><div><input class="blank" id="q3" placeholder="영문 약어"><div class="fb" id="q3-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 04</div>
+    <div class="q-text">IP 주소를 알고 있을 때 해당 장치의 <em>MAC 주소를 알아내는</em> 프로토콜은? 반대로 MAC 주소로 IP 주소를 알아내는 프로토콜은?</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q4a" placeholder="IP → MAC"><div class="fb" id="q4a-fb"></div></div>
+      <div><input class="blank" id="q4b" placeholder="MAC → IP"><div class="fb" id="q4b-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 05</div>
+    <div class="q-text">다음 설명에 해당하는 프로토콜 이름을 쓰시오.<br>
+    최단 경로 탐색에 <em>다익스트라 알고리즘</em> 기반. 링크 상태 변화 시에만 라우팅 정보를 전송하는 라우팅 프로토콜.</div>
+    <div class="blank-row"><div><input class="blank" id="q5" placeholder="영문 약어"><div class="fb" id="q5-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 06</div>
+    <div class="q-text">TCP와 UDP의 차이를 각 항목에 맞게 쓰시오.<br>
+    ① TCP의 연결 방식은 <em>( ① )</em> 지향이다.<br>
+    ② UDP가 TCP보다 속도가 빠른 이유는 재전송이 없고 연결 설정이 필요 없기 때문이다. UDP의 헤더 크기는 <em>( ② )</em> Byte이다.</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q6a" placeholder="①"><div class="fb" id="q6a-fb"></div></div>
+      <div><input class="blank" id="q6b" placeholder="② 숫자"><div class="fb" id="q6b-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 07</div>
+    <div class="q-text">FTP의 포트 번호를 쓰시오. 데이터 전송용 포트와 제어용 포트 각각 작성.</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q7a" placeholder="데이터 포트"><div class="fb" id="q7a-fb"></div></div>
+      <div><input class="blank" id="q7b" placeholder="제어 포트"><div class="fb" id="q7b-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 08</div>
+    <div class="q-text">OSI 7계층에서 <em>MAC 주소</em>를 사용하여 통신하며, <em>스위치와 브리지</em>가 해당하는 계층은?</div>
+    <div class="blank-row"><div><input class="blank" id="q8" placeholder="계층 이름"><div class="fb" id="q8-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 09</div>
+    <div class="q-text">이메일을 <em>발송</em>할 때 사용하는 프로토콜과 이메일을 <em>수신</em>할 때 사용하는 프로토콜을 쓰시오.</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q9a" placeholder="발송 프로토콜"><div class="fb" id="q9a-fb"></div></div>
+      <div><input class="blank" id="q9b" placeholder="수신 프로토콜"><div class="fb" id="q9b-fb"></div></div>
+    </div>
+  </div>
+
+  <button class="grade-btn" onclick="grade()">채점하기</button>
+  <div class="score-box" id="score-box">
+    <div class="score-num" id="score-num">0/12</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">정답 수</div>
+    <br><button class="retry-btn" onclick="retry()">다시 풀기</button>
+  </div>
+</div>
+
+</div><!-- /page -->
+<script>
+window.addEventListener('scroll',()=>{
+  document.getElementById('prog-bar').style.width=Math.min((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100,100)+'%';
+});
+const ANS={
+  q1:['물리 계층','물리','physical layer','physical'],
+  q2a:['데이터링크 계층','데이터 링크 계층','데이터링크','data link'],
+  q2b:['네트워크 계층','네트워크','network'],
+  q2c:['표현 계층','표현','presentation'],
+  q3:['icmp'],
+  q4a:['arp'],q4b:['rarp'],
+  q5:['ospf'],
+  q6a:['연결','연결 지향'],q6b:['8'],
+  q7a:['20'],q7b:['21'],
+  q8:['데이터링크 계층','데이터 링크 계층','데이터링크','data link'],
+  q9a:['smtp'],q9b:['pop3'],
+};
+const WIDE_IDS=['q2a','q2b','q2c'];
+function check(id,ans){
+  const el=document.getElementById(id),fb=document.getElementById(id+'-fb'),v=el.value.trim().toLowerCase();
+  const ok=ans.some(a=>v===a.toLowerCase());
+  el.classList.toggle('correct',ok);el.classList.toggle('wrong',!ok);
+  if(ok){fb.textContent='✓ 정답';fb.className='fb ok';}
+  else{fb.textContent='✗ '+ans[0];fb.className='fb no';}
+  return ok;
+}
+function grade(){
+  let c=0;for(const[id,ans]of Object.entries(ANS))if(check(id,ans))c++;
+  const sb=document.getElementById('score-box');
+  document.getElementById('score-num').textContent=c+'/'+Object.keys(ANS).length;
+  sb.classList.add('show');sb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function retry(){
+  Object.keys(ANS).forEach(id=>{
+    const el=document.getElementById(id);
+    el.value='';
+    el.className='blank'+(WIDE_IDS.includes(id)?' wide':'');
+    document.getElementById(id+'-fb').textContent='';
+  });
+  document.getElementById('score-box').classList.remove('show');
+}
+</script>
+</body>
+</html>

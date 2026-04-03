@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소프트웨어 테스트 — 정보처리기사 실기</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1c2333;
+  --border:#252d40;--border2:#2d3a55;
+  --text:#e2e8f0;--dim:#94a3b8;--muted:#475569;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;
+  --yellow:#eab308;--teal:#14b8a6;--orange:#f97316;--purple:#a855f7;
+  --accent:#ec4899; /* 핑크 테마 */
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.75;}
+#prog-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:999;transition:width .1s;}
+.page{max-width:740px;margin:0 auto;padding:0 20px 80px;}
+.page-header{padding:40px 0 32px;border-bottom:1px solid var(--border);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-decoration:none;font-family:'Space Mono',monospace;margin-bottom:20px;transition:color .15s;}
+.back-btn:hover{color:var(--accent);}
+.ch-badge{font-family:'Space Mono',monospace;font-size:11px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);color:var(--accent);padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+h1.page-title{font-size:30px;font-weight:700;color:#fff;margin-top:12px;line-height:1.2;}
+.page-meta{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.meta-item{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.tag{font-size:11px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);padding:2px 8px;border-radius:10px;}
+
+.section{padding:40px 0;border-bottom:1px solid var(--border);}
+.section-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.section-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);min-width:28px;margin-top:2px;}
+.section-title{font-size:20px;font-weight:700;color:#fff;line-height:1.3;}
+.exam-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.badge-exam{font-size:11px;padding:2px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;background:#4c0519;color:#fca5a5;border:1px solid rgba(252,165,165,.2);}
+.def-box{border-left:3px solid var(--accent);background:rgba(236,72,153,.05);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+.def-box p{font-size:14px;color:var(--text);line-height:1.7;}
+.def-box strong{color:var(--accent);}
+.story-box{background:rgba(234,179,8,.04);border:1px solid rgba(234,179,8,.18);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.story-box .sl{font-size:11px;color:var(--yellow);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.story-box p{font-size:13px;color:var(--dim);line-height:1.7;}
+.story-box strong{color:var(--yellow);}
+.ex-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.ex-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.ct{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;}
+.ct th{background:var(--bg3);border:1px solid var(--border);padding:9px 13px;color:var(--dim);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-align:left;}
+.ct td{border:1px solid var(--border);padding:9px 13px;color:var(--dim);vertical-align:top;line-height:1.6;}
+.ct td:first-child{font-weight:700;color:var(--text);}
+.ct tr:hover td{background:rgba(255,255,255,.015);}
+code.inline{font-family:'Space Mono',monospace;font-size:12px;background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:3px;color:var(--teal);}
+
+/* 블랙/화이트 비교 */
+.bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+.bw-card{border-radius:8px;padding:18px;}
+.bw-black{background:rgba(30,30,30,.6);border:1px solid #444;}
+.bw-white{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);}
+.bw-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.bw-icon{font-size:20px;}
+.bw-desc{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:12px;}
+.bw-list{list-style:none;}
+.bw-list li{font-size:12px;color:var(--text);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.bw-list li:last-child{border-bottom:none;}
+.bw-list li::before{content:'▸ ';color:var(--accent);font-size:10px;}
+
+/* 기법 카드 */
+.tech-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.tech-head{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);}
+.tech-type{font-family:'Space Mono',monospace;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700;white-space:nowrap;}
+.tt-black{background:rgba(30,30,30,.8);border:1px solid #555;color:#ccc;}
+.tt-white{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#eee;}
+.tech-name{font-weight:700;font-size:14px;color:#fff;flex:1;}
+.tech-name-en{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-top:1px;}
+.freq-star{color:var(--yellow);font-size:12px;}
+.tech-body{padding:13px 18px;}
+.tech-body p{font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:6px;}
+.tech-body p:last-child{margin-bottom:0;}
+.tech-body strong{color:var(--text);}
+.tech-body .point{color:var(--accent);}
+
+/* 커버리지 카드 */
+.cov-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;}
+.cov-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;border-top:3px solid;}
+.cov-card.stmt{border-top-color:var(--blue);}
+.cov-card.branch{border-top-color:var(--green);}
+.cov-card.cond{border-top-color:var(--yellow);}
+.cov-num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;margin-bottom:4px;}
+.cov-card.stmt .cov-num{color:var(--blue);}
+.cov-card.branch .cov-num{color:var(--green);}
+.cov-card.cond .cov-num{color:var(--yellow);}
+.cov-name{font-weight:700;font-size:13px;color:#fff;margin-bottom:4px;}
+.cov-en{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;}
+.cov-desc{font-size:12px;color:var(--dim);line-height:1.5;}
+
+/* 코드 블록 */
+pre{background:#080d14;border:1px solid var(--border);border-radius:6px;padding:14px 16px;overflow-x:auto;margin:12px 0;font-family:'Space Mono',monospace;font-size:12px;line-height:1.8;color:#cdd9e5;}
+.kw{color:#79c0ff;}.cm{color:#8b949e;font-style:italic;}.str{color:#a5d6ff;}.num{color:#ffa657;}
+.hl-stmt{background:rgba(59,130,246,.15);border-radius:2px;padding:1px 0;}
+.hl-branch{background:rgba(34,197,94,.12);border-radius:2px;padding:1px 0;}
+.hl-cond{background:rgba(234,179,8,.12);border-radius:2px;padding:1px 0;}
+
+/* V모델 */
+.v-model{position:relative;margin:20px 0;overflow-x:auto;}
+.v-row{display:flex;align-items:center;gap:0;margin-bottom:2px;}
+.v-left{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:4px;padding:7px 12px;font-size:12px;color:#93c5fd;font-weight:700;min-width:130px;text-align:center;}
+.v-right{background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);border-radius:4px;padding:7px 12px;font-size:12px;color:#f9a8d4;font-weight:700;min-width:130px;text-align:center;margin-left:auto;}
+.v-arrow{flex:1;text-align:center;font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+/* 통합 테스트 */
+.integ-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+.integ-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.integ-title{font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;}
+.integ-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;}
+.integ-row{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);padding:4px 0;border-bottom:1px solid var(--border);}
+.integ-row:last-child{border-bottom:none;}
+.integ-row span:last-child{color:var(--text);font-weight:700;}
+
+/* 오라클 카드 */
+.oracle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+.oracle-card{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:14px;}
+.oracle-name{font-weight:700;font-size:13px;color:#fff;margin-bottom:3px;}
+.oracle-en{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:7px;}
+.oracle-desc{font-size:12px;color:var(--dim);line-height:1.5;}
+
+/* 커버리지 인터랙티브 퀴즈 */
+.cov-quiz{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin:16px 0;}
+.cov-quiz h3{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.cov-quiz p.sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:14px;}
+.cov-q{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.cov-q:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.cov-code{background:#080d14;border:1px solid var(--border);border-radius:5px;padding:12px;font-family:'Space Mono',monospace;font-size:12px;color:#cdd9e5;line-height:1.8;margin-bottom:10px;overflow-x:auto;}
+.cov-q-text{font-size:13px;color:var(--text);margin-bottom:8px;}
+.opt-row{display:flex;gap:8px;flex-wrap:wrap;}
+.opt-btn{background:var(--bg3);border:1px solid var(--border);color:var(--dim);font-size:12px;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .15s;}
+.opt-btn:hover{border-color:var(--accent);color:var(--accent);}
+.opt-btn.selected{border-color:var(--accent);background:rgba(236,72,153,.1);color:var(--accent);}
+.opt-btn.correct-ans{border-color:var(--green);background:rgba(34,197,94,.08);color:var(--green);}
+.opt-btn.wrong-ans{border-color:var(--red);background:rgba(239,68,68,.06);color:var(--red);}
+.cov-fb{font-size:12px;font-family:'Space Mono',monospace;margin-top:6px;min-height:16px;}
+.cov-run-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;}
+.cov-run-btn:hover{opacity:.88;}
+.cov-score{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:12px;text-align:center;font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);}
+.cov-score.show{display:block;}
+
+/* quiz */
+.quiz-section{padding:40px 0 0;}
+.quiz-header{margin-bottom:24px;}
+.quiz-header h2{font-size:20px;font-weight:700;color:#fff;}
+.quiz-header p{font-size:13px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;}
+.quiz-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:12px;}
+.q-num{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:var(--accent);color:#fff;padding:2px 8px;border-radius:3px;margin-bottom:10px;}
+.q-text{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.q-text em{font-style:normal;background:rgba(236,72,153,.1);border-bottom:2px solid var(--accent);padding:1px 4px;border-radius:2px;color:var(--accent);}
+.blank-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.blank{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:14px;padding:8px 12px;border-radius:5px;width:180px;font-family:'Space Mono',monospace;transition:border-color .15s;outline:none;}
+.blank.wide{width:280px;}
+.blank:focus{border-color:var(--accent);}
+.blank.correct{border-color:var(--green)!important;background:rgba(34,197,94,.06);}
+.blank.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.06);}
+.fb{font-size:12px;font-family:'Space Mono',monospace;margin-top:4px;}
+.fb.ok{color:var(--green);}.fb.no{color:var(--red);}
+.grade-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .15s;font-family:'Noto Sans KR',sans-serif;}
+.grade-btn:hover{opacity:.88;}
+.score-box{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:14px;text-align:center;}
+.score-box.show{display:block;}
+.score-num{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);}
+.retry-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 20px;border-radius:5px;cursor:pointer;font-size:13px;margin-top:12px;font-family:'Noto Sans KR',sans-serif;}
+
+@media(max-width:600px){
+  .page{padding:0 16px 60px;}
+  h1.page-title{font-size:24px;}
+  .section{padding:28px 0;}
+  .section-title{font-size:17px;}
+  .bw-grid,.integ-grid,.oracle-grid{grid-template-columns:1fr;}
+  .cov-grid{grid-template-columns:1fr;}
+  .ct{display:block;overflow-x:auto;}
+  .blank,.blank.wide{width:100%;max-width:280px;}
+  pre{font-size:11px;}
+  .opt-row{gap:6px;}
+}
+</style>
+</head>
+<body>
+<div id="prog-bar"></div>
+<div class="page">
+
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Study Hub</a>
+  <div><span class="ch-badge">Ch 06 · SW 개발</span></div>
+  <h1 class="page-title">소프트웨어 테스트<br>Software Testing</h1>
+  <div class="page-meta">
+    <span class="meta-item">⏱ 약 12분</span>
+    <span class="tag">블랙박스</span><span class="tag">화이트박스</span>
+    <span class="tag">커버리지</span><span class="tag">통합 테스트</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section" style="padding-top:28px;">
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;font-family:'Space Mono',monospace;">▸ 전체 요약</p>
+  <table class="ct" style="margin-top:0;">
+    <thead><tr><th>구분</th><th>특징</th><th>주요 기법</th></tr></thead>
+    <tbody>
+      <tr><td>블랙박스 테스트</td><td>내부 구조 모름. 입력-출력 관점</td><td>동치 분할, 경계값 분석, 원인-결과 그래핑, 오류 예측</td></tr>
+      <tr><td>화이트박스 테스트</td><td>내부 구조 알고 있음. 구조·논리 검증</td><td>기초 경로, 루프 테스트, 데이터 흐름</td></tr>
+      <tr><td style="color:var(--accent)">커버리지 ★★★★</td><td>코드 실행 범위 측정</td><td>문장(Statement), 분기(Branch), 조건(Condition)</td></tr>
+      <tr><td>통합 테스트</td><td>모듈 간 인터페이스 검증</td><td>상향식(드라이버), 하향식(스텁), 빅뱅, 샌드위치</td></tr>
+      <tr><td>테스트 오라클</td><td>테스트 결과의 참·거짓 판단 기준</td><td>참, 샘플링, 휴리스틱, 일관성</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 1: 블랙박스 vs 화이트박스 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <div class="section-title-wrap">
+      <div class="section-title">블랙박스 vs 화이트박스</div>
+      <div class="exam-badges"><span class="badge-exam">20년 3회</span><span class="badge-exam">22년 1회</span></div>
+    </div>
+  </div>
+  <div class="bw-grid">
+    <div class="bw-card bw-black">
+      <div class="bw-title"><span class="bw-icon">⬛</span> 블랙박스 테스트</div>
+      <div class="bw-desc">내부 구조를 <strong style="color:#fff">모르는 상태</strong>에서 <strong style="color:#fff">입력값과 출력값</strong>만으로 검증. 명세 기반 테스트.</div>
+      <ul class="bw-list">
+        <li>동치 분할 (Equivalence Partitioning)</li>
+        <li>경계값 분석 (Boundary Value Analysis)</li>
+        <li>원인-결과 그래핑 (Cause-Effect Graphing)</li>
+        <li>오류 예측 (Error Guessing)</li>
+        <li>비교 테스팅 (Comparison Testing)</li>
+        <li>페어와이즈 테스팅</li>
+      </ul>
+    </div>
+    <div class="bw-card bw-white">
+      <div class="bw-title"><span class="bw-icon">⬜</span> 화이트박스 테스트</div>
+      <div class="bw-desc">내부 <strong style="color:#fff">코드 구조와 로직</strong>을 알고 수행. 모든 경로를 검증. 구조 기반 테스트.</div>
+      <ul class="bw-list">
+        <li>기초 경로 검사 (Base Path Test)</li>
+        <li>루프 검사 (Loop Test)</li>
+        <li>데이터 흐름 검사 (Data Flow)</li>
+        <li>조건 검사 (Condition Testing)</li>
+        <li>구조 검사 (Structure Testing)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="story-box">
+    <div class="sl">💡 암기법</div>
+    <p><strong>블랙박스 = 냉장고 외부에서 온도만 확인</strong> (내부 회로 모름)<br>
+    <strong>화이트박스 = 냉장고 내부 회로를 직접 들여다보며 검사</strong></p>
+  </div>
+</div>
+
+<!-- SECTION 2: 블랙박스 기법 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <div class="section-title-wrap">
+      <div class="section-title">블랙박스 테스트 기법</div>
+      <div class="exam-badges">
+        <span class="badge-exam">21년 1회</span><span class="badge-exam">21년 3회</span>
+        <span class="badge-exam">22년 1회</span><span class="badge-exam">23년 3회</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-card">
+    <div class="tech-head">
+      <span class="tech-type tt-black">블랙박스</span>
+      <div class="tech-name">동치 분할 (동등 분할)<span class="tech-name-en">Equivalence Partitioning</span></div>
+      <span class="freq-star">★★★★</span>
+    </div>
+    <div class="tech-body">
+      <p>입력 데이터를 <strong>동일한 결과를 내는 등가 클래스(구간)</strong>로 나누어, 각 클래스에서 대표값 하나만 테스트. 테스트 케이스 수를 최소화하면서 효율성 극대화.</p>
+      <div class="ex-box" style="margin-top:10px;">
+        <div class="ex-label">예시 — 점수 입력 (0~100 유효)</div>
+        <p style="font-size:13px;color:var(--dim);">유효 클래스: 0~100 → 대표값 <strong style="color:var(--text)">50</strong> 하나만 테스트<br>무효 클래스1: -1 이하 → 대표값 <strong style="color:var(--text)">-1</strong><br>무효 클래스2: 101 이상 → 대표값 <strong style="color:var(--text)">101</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-card">
+    <div class="tech-head">
+      <span class="tech-type tt-black">블랙박스</span>
+      <div class="tech-name">경계값 분석<span class="tech-name-en">Boundary Value Analysis</span></div>
+      <span class="freq-star">★★★★</span>
+    </div>
+    <div class="tech-body">
+      <p>오류는 <strong>경계(끝 값)에서 가장 많이 발생</strong>한다는 원칙. 유효 범위의 경계 값과 그 바로 안팎의 값을 테스트.</p>
+      <div class="ex-box" style="margin-top:10px;">
+        <div class="ex-label">예시 — 0 ≤ X ≤ 10 범위 (21년 1회 기출)</div>
+        <p style="font-size:13px;color:var(--dim);">테스트 입력값: <strong style="color:var(--text)">-1, 0, 1</strong> (하한 경계) + <strong style="color:var(--text)">9, 10, 11</strong> (상한 경계)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-card">
+    <div class="tech-head">
+      <span class="tech-type tt-black">블랙박스</span>
+      <div class="tech-name">원인-결과 그래핑<span class="tech-name-en">Cause-Effect Graphing</span></div>
+      <span class="freq-star">★★★</span>
+    </div>
+    <div class="tech-body">
+      <p>입력 데이터 간의 <strong>관계</strong>와 출력에 영향을 미치는 상황을 <strong>체계적으로 분석</strong>하여 효용성 높은 테스트 케이스 선정. 복잡한 조건 조합 테스트에 유용.</p>
+      <div class="story-box" style="margin-bottom:0;margin-top:8px;">
+        <div class="sl">💡 기출 포인트</div>
+        <p>"입력 데이터 간의 관계와 출력에 영향을 미치는 상황을 체계적으로 분석하여 효용성 높은 검사 사례를 선정"<br>→ <strong>원인-결과 그래핑(Cause-Effect Graphing)</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-card">
+    <div class="tech-head">
+      <span class="tech-type tt-black">블랙박스</span>
+      <div class="tech-name">오류 예측<span class="tech-name-en">Error Guessing</span></div>
+    </div>
+    <div class="tech-body">
+      <p>테스터의 <strong>경험과 직관</strong>을 바탕으로 오류가 발생할 만한 입력값을 예측해 테스트. 공식적인 절차는 없으나 숙련된 테스터에게 효과적.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: 커버리지 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <div class="section-title-wrap">
+      <div class="section-title">커버리지 (Coverage) — 최빈출!</div>
+      <div class="exam-badges">
+        <span class="badge-exam">21년 2회</span><span class="badge-exam">22년 1회</span>
+        <span class="badge-exam">23년 2회</span><span class="badge-exam">24년 3회</span>
+        <span class="badge-exam">25년 1회</span>
+      </div>
+    </div>
+  </div>
+  <div class="def-box"><p>테스트가 <strong>소스코드를 얼마나 실행했는지</strong> 측정하는 지표. 화이트박스 테스트에서 사용. <strong>강도: 문장 &lt; 분기 &lt; 조건</strong></p></div>
+
+  <div class="cov-grid">
+    <div class="cov-card stmt">
+      <div class="cov-num">①</div>
+      <div class="cov-name">문장 커버리지</div>
+      <div class="cov-en">Statement Coverage</div>
+      <div class="cov-desc">모든 <strong style="color:var(--text)">구문(명령문)</strong>이 최소 한 번 이상 실행되었는지 확인. 가장 약한 기준.</div>
+    </div>
+    <div class="cov-card branch">
+      <div class="cov-num">②</div>
+      <div class="cov-name">분기 커버리지</div>
+      <div class="cov-en">Branch / Decision Coverage</div>
+      <div class="cov-desc">모든 <strong style="color:var(--text)">분기(if·switch)</strong>의 True/False 결과가 각각 한 번 이상 실행. 문장 커버리지를 포함.</div>
+    </div>
+    <div class="cov-card cond">
+      <div class="cov-num">③</div>
+      <div class="cov-name">조건 커버리지</div>
+      <div class="cov-en">Condition Coverage</div>
+      <div class="cov-desc">각 <strong style="color:var(--text)">조건식</strong>이 True·False를 모두 한 번씩 가지도록 테스트. 가장 강한 기준.</div>
+    </div>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">코드로 보는 커버리지 차이 (24년 3회 유형)</div>
+    <pre><span class="kw">int</span> score = 85;
+<span class="kw">boolean</span> pass = false;
+
+<span class="hl-stmt"><span class="kw">if</span> (score >= 60 &amp;&amp; score <= 100) {</span>     <span class="cm">← 조건식: score>=60  AND  score<=100</span>
+    <span class="hl-stmt">pass = true;</span>
+<span class="hl-stmt">}</span>
+<span class="hl-stmt">System.out.println(pass);</span></pre>
+    <table class="ct" style="margin:8px 0 0;">
+      <thead><tr><th>커버리지</th><th>필요한 테스트 케이스</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--blue)">문장</td><td>score=85 (1개로 충분)</td><td>모든 구문을 한 번만 실행하면 OK</td></tr>
+        <tr><td style="color:var(--green)">분기</td><td>score=85 (true), score=50 (false)</td><td>if문의 참·거짓 경로 모두 실행</td></tr>
+        <tr><td style="color:var(--yellow)">조건</td><td>score>=60 T/F, score<=100 T/F 각각</td><td>개별 조건식이 T/F를 모두 가져야</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 커버리지 인터랙티브 퀴즈 -->
+  <div class="cov-quiz">
+    <h3>🎯 커버리지 판별 연습</h3>
+    <p class="sub">설명을 읽고 어떤 커버리지인지 선택하세요</p>
+
+    <div class="cov-q" id="cq1">
+      <div class="cov-q-text">① "소프트웨어 테스트의 효율성 지표로, 각 <strong>조건식</strong>이 모두 참과 거짓인 경우를 최소 한 번씩 평가되었는지 측정" (23년 2회 기출)</div>
+      <div class="opt-row">
+        <button class="opt-btn" onclick="checkCov(this,'cq1','wrong')">문장 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq1','wrong')">분기 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq1','correct')">조건 커버리지</button>
+      </div>
+      <div class="cov-fb" id="cq1-fb"></div>
+    </div>
+
+    <div class="cov-q" id="cq2">
+      <div class="cov-q-text">② "코드 상의 모든 <strong>문장</strong>이 최소 한 번 이상 실행되는지를 검사" (24년 3회 기출)</div>
+      <div class="opt-row">
+        <button class="opt-btn" onclick="checkCov(this,'cq2','correct')">문장 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq2','wrong')">분기 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq2','wrong')">조건 커버리지</button>
+      </div>
+      <div class="cov-fb" id="cq2-fb"></div>
+    </div>
+
+    <div class="cov-q" id="cq3">
+      <div class="cov-q-text">③ "if나 switch 같은 <strong>분기문</strong>이 각각 정상적으로 수행되는지 확인" (24년 3회 기출)</div>
+      <div class="opt-row">
+        <button class="opt-btn" onclick="checkCov(this,'cq3','wrong')">문장 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq3','correct')">분기 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq3','wrong')">조건 커버리지</button>
+      </div>
+      <div class="cov-fb" id="cq3-fb"></div>
+    </div>
+
+    <div class="cov-q" id="cq4">
+      <div class="cov-q-text">④ "각 결정점에서 모든 가능한 결정 결과를 최소 한 번 이상 실행하도록 요구하며, 모든 조건식이 참과 거짓이 되도록" (24년 1회 기출)</div>
+      <div class="opt-row">
+        <button class="opt-btn" onclick="checkCov(this,'cq4','wrong')">문장 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq4','wrong')">분기 커버리지</button>
+        <button class="opt-btn" onclick="checkCov(this,'cq4','correct')">조건/결정 커버리지</button>
+      </div>
+      <div class="cov-fb" id="cq4-fb"></div>
+    </div>
+
+    <div class="cov-score" id="cov-score"></div>
+  </div>
+</div>
+
+<!-- SECTION 4: V 모델 + 통합 테스트 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <div class="section-title-wrap">
+      <div class="section-title">V 모델 · 통합 테스트</div>
+      <div class="exam-badges">
+        <span class="badge-exam">21년 2회</span><span class="badge-exam">21년 3회</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;font-weight:700;color:var(--dim);margin-bottom:10px;">V 모델 — 개발 단계 ↔ 테스트 단계 대응</p>
+  <div class="v-model">
+    <div class="v-row"><div class="v-left">요구사항 분석</div><div class="v-arrow">← → 대응</div><div class="v-right">인수 테스트</div></div>
+    <div class="v-row"><div class="v-left" style="margin-left:20px;">시스템 설계</div><div class="v-arrow"></div><div class="v-right" style="margin-right:20px;">시스템 테스트</div></div>
+    <div class="v-row"><div class="v-left" style="margin-left:40px;">상세 설계</div><div class="v-arrow"></div><div class="v-right" style="margin-right:40px;">통합 테스트</div></div>
+    <div class="v-row"><div class="v-left" style="margin-left:60px;">구현 (코딩)</div><div class="v-arrow">↓ ↑</div><div class="v-right" style="margin-right:60px;">단위 테스트</div></div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <p style="font-size:13px;font-weight:700;color:var(--dim);margin-bottom:10px;">통합 테스트 — 상향식 vs 하향식</p>
+    <div class="integ-grid">
+      <div class="integ-card" style="border-top:3px solid var(--blue);">
+        <div class="integ-title">하향식 통합 (Top-Down)</div>
+        <div class="integ-sub">상위 모듈 → 하위 모듈 순서로 통합</div>
+        <div class="integ-row"><span>더미 모듈</span><span>스텁 (Stub)</span></div>
+        <div class="integ-row"><span>역할</span><span>하위 모듈 대역</span></div>
+        <div class="integ-row"><span>장점</span><span>주요 기능 조기 검증</span></div>
+      </div>
+      <div class="integ-card" style="border-top:3px solid var(--orange);">
+        <div class="integ-title">상향식 통합 (Bottom-Up)</div>
+        <div class="integ-sub">하위 모듈 → 상위 모듈 순서로 통합</div>
+        <div class="integ-row"><span>더미 모듈</span><span>드라이버 (Driver)</span></div>
+        <div class="integ-row"><span>역할</span><span>상위 모듈 대역</span></div>
+        <div class="integ-row"><span>장점</span><span>하위 모듈 먼저 검증</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story-box">
+    <div class="sl">💡 암기법 — 스텁 vs 드라이버</div>
+    <p><strong>하향식 = 스텁(Stub)</strong> — 하향식은 위에서 아래로 내려오니, 아직 안 만들어진 하위 모듈을 임시로 채우는 스텁이 필요<br>
+    <strong>상향식 = 드라이버(Driver)</strong> — 상향식은 아래서 위로 올라오니, 위에서 호출해줄 상위 모듈 역할의 드라이버가 필요<br>
+    "아래가 없으면 <strong>스텁</strong>으로 막고, 위가 없으면 <strong>드라이버</strong>로 태워라"</p>
+  </div>
+</div>
+
+<!-- SECTION 5: 테스트 오라클 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <div class="section-title-wrap">
+      <div class="section-title">테스트 오라클 (Test Oracle)</div>
+      <div class="exam-badges"><span class="badge-exam">20년 4회</span></div>
+    </div>
+  </div>
+  <div class="def-box"><p>테스트 수행 후 <strong>결과가 올바른지 판단</strong>할 수 있는 기준 또는 메커니즘.</p></div>
+  <div class="oracle-grid">
+    <div class="oracle-card" style="border-left:3px solid var(--green);">
+      <div class="oracle-name">참(True) 오라클</div>
+      <div class="oracle-en">True Oracle</div>
+      <div class="oracle-desc">모든 입력값에 대해 기대하는 결과를 제공. 완전한 판단 가능. 비용 高.</div>
+    </div>
+    <div class="oracle-card" style="border-left:3px solid var(--blue);">
+      <div class="oracle-name">샘플링(Sampling) 오라클</div>
+      <div class="oracle-en">Sampling Oracle</div>
+      <div class="oracle-desc">특정 몇 개의 입력값에 대해서만 결과 제공. 일반·업무용에서 사용.</div>
+    </div>
+    <div class="oracle-card" style="border-left:3px solid var(--yellow);">
+      <div class="oracle-name">휴리스틱(Heuristic) 오라클</div>
+      <div class="oracle-en">Heuristic Oracle</div>
+      <div class="oracle-desc">나머지 값들은 경험·직관으로 판단. 샘플링 오라클의 확장.</div>
+    </div>
+    <div class="oracle-card" style="border-left:3px solid var(--purple);">
+      <div class="oracle-name">일관성 검사 오라클</div>
+      <div class="oracle-en">Consistent Oracle</div>
+      <div class="oracle-desc">앱 변경 전·후의 결과가 동일한지 비교 검사. 회귀 테스트에 활용.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>📝 실기 대비 문제</h2>
+    <p>빈칸을 채우고 채점하기를 눌러보세요</p>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 01</div>
+    <div class="q-text">다음 중 <em>블랙박스 테스트 기법</em>을 모두 고르시오. (22년 1회 기출)<br>
+    ① Equivalence Partitioning &nbsp;② Boundary Value Analysis &nbsp;③ Base Path Test &nbsp;④ Loop Test &nbsp;⑤ Cause-effect Graph</div>
+    <div class="blank-row"><div><input class="blank wide" id="q1" placeholder="번호를 쉼표로 구분"><div class="fb" id="q1-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 02</div>
+    <div class="q-text">테스트 기법 중 입력 데이터 간의 관계와 출력에 영향을 미치는 상황을 <em>체계적으로 분석</em>하여 효용성 높은 검사 사례를 선정하는 기법은? (21년 3회 기출)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q2" placeholder="정답 입력"><div class="fb" id="q2-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 03</div>
+    <div class="q-text">다음 커버리지 3가지를 쓰시오. (24년 3회 기출)<br>
+    ① 코드 상의 모든 <em>문장</em>이 최소 한 번 이상 실행되는지 검사<br>
+    ② if·switch 같은 <em>분기문</em>이 각각 수행되는지 확인<br>
+    ③ 각 <em>조건식</em>이 참/거짓으로 조합되도록 확인</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q3a" placeholder="① 커버리지"><div class="fb" id="q3a-fb"></div></div>
+      <div><input class="blank" id="q3b" placeholder="② 커버리지"><div class="fb" id="q3b-fb"></div></div>
+      <div><input class="blank" id="q3c" placeholder="③ 커버리지"><div class="fb" id="q3c-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 04</div>
+    <div class="q-text">하향식 통합 테스트에서 아직 개발되지 않은 <em>하위 모듈을 대신</em>하여 사용하는 더미 모듈은? (21년 2회 기출)</div>
+    <div class="blank-row"><div><input class="blank" id="q4" placeholder="정답 입력"><div class="fb" id="q4-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 05</div>
+    <div class="q-text">소프트웨어를 <em>하위 모듈에서 상위 모듈 방향</em>으로 통합하면서 테스트하는 기법은? 이때 상위 모듈 역할을 하는 더미 모듈의 이름은? (21년 3회 기출)</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q5a" placeholder="테스트 기법"><div class="fb" id="q5a-fb"></div></div>
+      <div><input class="blank" id="q5b" placeholder="더미 모듈 이름"><div class="fb" id="q5b-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 06</div>
+    <div class="q-text">일반·업무용·게임에서 사용되며, <em>특정 몇 개의 입력값</em>에 대해서만 기대하는 결과를 제공해 주는 테스트 오라클은? (20년 4회 기출)</div>
+    <div class="blank-row"><div><input class="blank" id="q6" placeholder="정답 입력"><div class="fb" id="q6-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 07</div>
+    <div class="q-text">블랙박스 테스트 기법 중, 입력 데이터를 <em>유사한 결과를 내는 그룹</em>으로 나누어 각 그룹의 대표값 하나만 테스트하는 기법은?</div>
+    <div class="blank-row"><div><input class="blank wide" id="q7" placeholder="정답 입력"><div class="fb" id="q7-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 08</div>
+    <div class="q-text">블랙박스 테스트 vs 화이트박스 테스트에 대해 빈칸을 채우시오.<br>
+    ① 내부 구조를 모르는 상태에서 입력·출력만으로 검증: <em>( ① )</em> 테스트<br>
+    ② 내부 코드 구조와 로직을 알고 모든 경로를 검증: <em>( ② )</em> 테스트</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q8a" placeholder="①"><div class="fb" id="q8a-fb"></div></div>
+      <div><input class="blank" id="q8b" placeholder="②"><div class="fb" id="q8b-fb"></div></div>
+    </div>
+  </div>
+
+  <button class="grade-btn" onclick="grade()">채점하기</button>
+  <div class="score-box" id="score-box">
+    <div class="score-num" id="score-num">0/11</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">정답 수</div>
+    <br><button class="retry-btn" onclick="retry()">다시 풀기</button>
+  </div>
+</div>
+
+</div>
+<script>
+window.addEventListener('scroll',()=>{
+  document.getElementById('prog-bar').style.width=Math.min((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100,100)+'%';
+});
+
+// 커버리지 인터랙티브
+let covCorrect=0,covAnswered=new Set();
+function checkCov(btn,qId,result){
+  if(covAnswered.has(qId))return;
+  covAnswered.add(qId);
+  const fb=document.getElementById(qId+'-fb');
+  const allBtns=btn.closest('.cov-q').querySelectorAll('.opt-btn');
+  allBtns.forEach(b=>b.style.pointerEvents='none');
+  if(result==='correct'){
+    btn.classList.add('correct-ans');
+    fb.textContent='✓ 정답!';fb.style.color='var(--green)';
+    covCorrect++;
+  } else {
+    btn.classList.add('wrong-ans');
+    fb.textContent='✗ 오답. 다시 생각해보세요.';fb.style.color='var(--red)';
+    // highlight correct
+    const qMap={'cq1':2,'cq2':0,'cq3':1,'cq4':2};
+    allBtns[qMap[qId]].classList.add('correct-ans');
+  }
+  if(covAnswered.size===4){
+    const sc=document.getElementById('cov-score');
+    sc.textContent=`${covCorrect}/4 정답!`;sc.classList.add('show');
+  }
+}
+
+// Quiz
+const ANS={
+  q1:['①②⑤','①, ②, ⑤','1,2,5','①,②,⑤'],
+  q2:['cause-effect graphing','원인-결과 그래핑','원인결과 그래핑','cause effect graphing'],
+  q3a:['문장 커버리지','문장','statement coverage','statement'],
+  q3b:['분기 커버리지','분기','branch coverage','branch','decision coverage','decision'],
+  q3c:['조건 커버리지','조건','condition coverage','condition'],
+  q4:['스텁','stub'],
+  q5a:['상향식 테스트','상향식 통합','bottom-up'],
+  q5b:['드라이버','driver','테스트 드라이버'],
+  q6:['샘플링 오라클','sampling oracle','샘플링'],
+  q7:['동치 분할','동등 분할','equivalence partitioning'],
+  q8a:['블랙박스','블랙박스 테스트','black box'],
+  q8b:['화이트박스','화이트박스 테스트','white box'],
+};
+const WIDE=['q1','q2','q7'];
+function check(id,ans){
+  const el=document.getElementById(id),fb=document.getElementById(id+'-fb'),v=el.value.trim().toLowerCase().replace(/\s+/g,'');
+  const ok=ans.some(a=>v===a.toLowerCase().replace(/\s+/g,''));
+  el.classList.toggle('correct',ok);el.classList.toggle('wrong',!ok);
+  if(ok){fb.textContent='✓ 정답';fb.className='fb ok';}
+  else{fb.textContent='✗ '+ans[0];fb.className='fb no';}
+  return ok;
+}
+function grade(){
+  let c=0;for(const[id,ans]of Object.entries(ANS))if(check(id,ans))c++;
+  const sb=document.getElementById('score-box');
+  document.getElementById('score-num').textContent=c+'/'+Object.keys(ANS).length;
+  sb.classList.add('show');sb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function retry(){
+  Object.keys(ANS).forEach(id=>{
+    const el=document.getElementById(id);el.value='';
+    el.className='blank'+(WIDE.includes(id)?' wide':'');
+    document.getElementById(id+'-fb').textContent='';
+  });
+  document.getElementById('score-box').classList.remove('show');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로세스 스케줄링 — 정보처리기사 실기</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1c2333;
+  --border:#252d40;--border2:#2d3a55;
+  --text:#e2e8f0;--dim:#94a3b8;--muted:#475569;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;
+  --yellow:#eab308;--teal:#14b8a6;--orange:#f97316;--purple:#a855f7;
+  --accent:#f97316; /* 스케줄링 테마 = 주황 */
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.75;}
+#prog-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:999;transition:width .1s;}
+.page{max-width:740px;margin:0 auto;padding:0 20px 80px;}
+.page-header{padding:40px 0 32px;border-bottom:1px solid var(--border);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-decoration:none;font-family:'Space Mono',monospace;margin-bottom:20px;transition:color .15s;}
+.back-btn:hover{color:var(--accent);}
+.ch-badge{font-family:'Space Mono',monospace;font-size:11px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:var(--accent);padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+h1.page-title{font-size:30px;font-weight:700;color:#fff;margin-top:12px;line-height:1.2;}
+.page-meta{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.meta-item{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.tag{font-size:11px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);padding:2px 8px;border-radius:10px;}
+
+/* 공통 */
+.section{padding:40px 0;border-bottom:1px solid var(--border);}
+.section-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.section-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);min-width:28px;margin-top:2px;}
+.section-title{font-size:20px;font-weight:700;color:#fff;line-height:1.3;}
+.exam-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.badge-exam{font-size:11px;padding:2px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;background:#4c0519;color:#fca5a5;border:1px solid rgba(252,165,165,.2);}
+.def-box{border-left:3px solid var(--accent);background:rgba(249,115,22,.05);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+.def-box p{font-size:14px;color:var(--text);line-height:1.7;}
+.def-box strong{color:var(--accent);}
+.story-box{background:rgba(234,179,8,.04);border:1px solid rgba(234,179,8,.18);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.story-box .sl{font-size:11px;color:var(--yellow);font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.story-box p{font-size:13px;color:var(--dim);line-height:1.7;}
+.story-box strong{color:var(--yellow);}
+.ex-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0;}
+.ex-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.ct{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;}
+.ct th{background:var(--bg3);border:1px solid var(--border);padding:9px 13px;color:var(--dim);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-align:left;}
+.ct td{border:1px solid var(--border);padding:9px 13px;color:var(--dim);vertical-align:top;line-height:1.6;}
+.ct td:first-child{font-weight:700;color:var(--text);}
+.ct tr:hover td{background:rgba(255,255,255,.015);}
+code.inline{font-family:'Space Mono',monospace;font-size:12px;background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:3px;color:var(--teal);}
+
+/* 선점/비선점 카드 */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+.type-card{border-radius:8px;padding:18px;}
+.type-card.nonpre{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);}
+.type-card.pre{background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.18);}
+.type-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:6px;}
+.type-title span{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);font-weight:400;margin-left:6px;}
+.type-desc{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:10px;}
+.algo-list{list-style:none;}
+.algo-list li{font-family:'Space Mono',monospace;font-size:12px;color:var(--text);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.algo-list li:last-child{border-bottom:none;}
+.algo-list li span{color:var(--dim);font-size:11px;margin-left:6px;}
+
+/* 알고리즘 카드 */
+.algo-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.algo-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.algo-badge{font-family:'Space Mono',monospace;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:700;white-space:nowrap;}
+.ab-non{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#93c5fd;}
+.ab-pre{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#fdba74;}
+.algo-name{font-weight:700;font-size:15px;color:#fff;flex:1;}
+.algo-name-en{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-top:1px;}
+.freq-star{color:var(--yellow);font-size:13px;}
+.algo-body{padding:14px 18px;}
+.algo-body p{font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:8px;}
+.algo-body p:last-child{margin-bottom:0;}
+.algo-body strong{color:var(--text);}
+.algo-body .point{color:var(--accent);}
+
+/* 간트차트 */
+.gantt-wrap{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;margin:12px 0;overflow-x:auto;}
+.gantt-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;}
+.gantt{display:flex;align-items:center;gap:0;margin-bottom:6px;}
+.gantt-pid{font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);width:28px;flex-shrink:0;}
+.gantt-bar-wrap{display:flex;flex:1;gap:1px;}
+.gb{display:flex;align-items:center;justify-content:center;height:28px;border-radius:2px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:rgba(0,0,0,.7);transition:opacity .15s;}
+.gb:hover{opacity:.8;}
+.gantt-time{display:flex;margin-top:2px;margin-left:28px;}
+.gt{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-align:left;}
+.gantt-axis{display:flex;align-items:center;gap:0;margin-top:4px;}
+.gantt-axis-wrap{display:flex;flex:1;gap:1px;}
+.ga{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-align:center;}
+
+/* HRN 계산기 */
+.calc-box{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin:16px 0;}
+.calc-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.calc-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:16px;}
+.calc-formula{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 16px;font-family:'Space Mono',monospace;font-size:14px;color:var(--accent);text-align:center;margin-bottom:16px;}
+.calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.ci-label{font-size:12px;color:var(--dim);margin-bottom:5px;}
+.ci-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:15px;padding:9px 12px;border-radius:5px;font-family:'Space Mono',monospace;outline:none;transition:border-color .15s;}
+.ci-input:focus{border-color:var(--accent);}
+.calc-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;}
+.calc-btn:hover{opacity:.88;}
+.calc-result{margin-top:14px;background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.2);border-radius:6px;padding:14px;display:none;text-align:center;}
+.calc-result.show{display:block;}
+.cr-num{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);}
+.cr-label{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* 평균 대기시간 계산기 */
+.avg-calc{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin:16px 0;}
+.avg-calc h3{font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;}
+.avg-calc p.sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:14px;}
+.proc-table-head{display:grid;grid-template-columns:1fr 1fr 1fr 32px;gap:8px;margin-bottom:6px;}
+.proc-th{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.proc-row{display:grid;grid-template-columns:1fr 1fr 1fr 32px;gap:8px;margin-bottom:6px;align-items:center;}
+.pi{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:13px;padding:8px 10px;border-radius:5px;font-family:'Space Mono',monospace;width:100%;outline:none;transition:border-color .15s;}
+.pi:focus{border-color:var(--accent);}
+.del-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);width:28px;height:36px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.add-btn{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);color:var(--accent);font-size:12px;padding:7px 14px;border-radius:5px;cursor:pointer;font-family:'Space Mono',monospace;margin-bottom:12px;transition:background .15s;}
+.add-btn:hover{background:rgba(249,115,22,.15);}
+.algo-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:13px;padding:8px 12px;border-radius:5px;font-family:'Space Mono',monospace;margin-bottom:14px;width:100%;outline:none;}
+.quantum-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.quantum-label{font-size:12px;color:var(--dim);}
+.quantum-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:13px;padding:8px 10px;border-radius:5px;font-family:'Space Mono',monospace;width:80px;outline:none;}
+.run-btn{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;}
+.run-btn:hover{opacity:.88;}
+.result-area{margin-top:14px;display:none;}
+.result-area.show{display:block;}
+.result-gantt-wrap{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;overflow-x:auto;margin-bottom:12px;}
+#dyn-gantt{display:flex;flex-direction:column;gap:4px;min-width:400px;}
+.avg-result{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:14px;font-family:'Space Mono',monospace;font-size:14px;color:var(--green);text-align:center;}
+.detail-table{width:100%;border-collapse:collapse;font-size:12px;font-family:'Space Mono',monospace;margin-bottom:12px;}
+.detail-table th{background:var(--bg3);border:1px solid var(--border);padding:7px 10px;color:var(--dim);font-size:11px;}
+.detail-table td{border:1px solid var(--border);padding:7px 10px;color:var(--dim);text-align:center;}
+.detail-table td:first-child{color:var(--text);font-weight:700;}
+
+/* QUIZ */
+.quiz-section{padding:40px 0 0;}
+.quiz-header{margin-bottom:24px;}
+.quiz-header h2{font-size:20px;font-weight:700;color:#fff;}
+.quiz-header p{font-size:13px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;}
+.quiz-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:12px;}
+.q-num{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:var(--accent);color:#fff;padding:2px 8px;border-radius:3px;margin-bottom:10px;}
+.q-text{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.q-text em{font-style:normal;background:rgba(249,115,22,.1);border-bottom:2px solid var(--accent);padding:1px 4px;border-radius:2px;color:var(--accent);}
+.blank-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.blank{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:14px;padding:8px 12px;border-radius:5px;width:160px;font-family:'Space Mono',monospace;transition:border-color .15s;outline:none;}
+.blank.wide{width:260px;}
+.blank:focus{border-color:var(--accent);}
+.blank.correct{border-color:var(--green)!important;background:rgba(34,197,94,.06);}
+.blank.wrong{border-color:var(--red)!important;background:rgba(239,68,68,.06);}
+.fb{font-size:12px;font-family:'Space Mono',monospace;margin-top:4px;}
+.fb.ok{color:var(--green);}.fb.no{color:var(--red);}
+.q-proc-table{width:100%;border-collapse:collapse;font-size:12px;font-family:'Space Mono',monospace;margin:10px 0;}
+.q-proc-table th{background:#0a2240;border:1px solid #1e3a5f;padding:7px 10px;color:#93c5fd;}
+.q-proc-table td{border:1px solid #1e2d40;padding:7px 10px;color:#cdd9e5;text-align:center;}
+.grade-btn{display:block;width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .15s;font-family:'Noto Sans KR',sans-serif;}
+.grade-btn:hover{opacity:.88;}
+.score-box{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:14px;text-align:center;}
+.score-box.show{display:block;}
+.score-num{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);}
+.retry-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 20px;border-radius:5px;cursor:pointer;font-size:13px;margin-top:12px;font-family:'Noto Sans KR',sans-serif;}
+.state-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0;}
+.state-box{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 8px;text-align:center;}
+.state-name{font-weight:700;font-size:12px;color:#fff;margin-bottom:3px;}
+.state-en{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.state-desc{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.4;}
+
+@media(max-width:600px){
+  .page{padding:0 16px 60px;}
+  h1.page-title{font-size:24px;}
+  .section{padding:28px 0;}
+  .section-title{font-size:17px;}
+  .type-grid{grid-template-columns:1fr;}
+  .ct,.q-proc-table,.detail-table{display:block;overflow-x:auto;}
+  .state-grid{grid-template-columns:1fr 1fr;}
+  .calc-inputs{grid-template-columns:1fr;}
+  .blank,.blank.wide{width:100%;max-width:280px;}
+}
+</style>
+</head>
+<body>
+<div id="prog-bar"></div>
+<div class="page">
+
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Study Hub</a>
+  <div><span class="ch-badge">Ch 05 · 운영체제</span></div>
+  <h1 class="page-title">프로세스 스케줄링<br>Process Scheduling</h1>
+  <div class="page-meta">
+    <span class="meta-item">⏱ 약 12분</span>
+    <span class="tag">선점 / 비선점</span>
+    <span class="tag">6가지 알고리즘</span>
+    <span class="tag">대기시간 계산</span>
+    <span class="tag">인터랙티브 계산기</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section" style="padding-top:28px;">
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;font-family:'Space Mono',monospace;">▸ 전체 요약</p>
+  <table class="ct" style="margin-top:0;">
+    <thead><tr><th>알고리즘</th><th>유형</th><th>핵심</th><th>특이점</th></tr></thead>
+    <tbody>
+      <tr><td>FCFS</td><td><span style="color:#93c5fd">비선점</span></td><td>도착 순서대로</td><td>호위 효과(Convoy) 문제</td></tr>
+      <tr><td>SJF</td><td><span style="color:#93c5fd">비선점</span></td><td>실행시간 짧은 것 먼저</td><td>평균 대기시간 최소, 기아 문제</td></tr>
+      <tr><td>HRN</td><td><span style="color:#93c5fd">비선점</span></td><td>우선순위 = (대기+실행)/실행</td><td>SJF 기아 문제 보완</td></tr>
+      <tr><td>우선순위</td><td><span style="color:#93c5fd">비선점</span></td><td>우선순위 높은 것 먼저</td><td>기아(Starvation) 문제</td></tr>
+      <tr><td>RR</td><td><span style="color:#fdba74">선점</span></td><td>Time Quantum 단위로 순환</td><td>시분할 시스템에 적합</td></tr>
+      <tr><td>SRT</td><td><span style="color:#fdba74">선점</span></td><td>남은 시간 가장 짧은 것 선점</td><td>SJF의 선점 버전</td></tr>
+      <tr><td>다단계 큐</td><td><span style="color:#fdba74">선점</span></td><td>여러 준비 큐 + 큐별 알고리즘</td><td>큐 간 이동 불가</td></tr>
+      <tr><td>다단계 피드백 큐</td><td><span style="color:#fdba74">선점</span></td><td>다단계 큐 + 큐 간 이동 가능</td><td>에이징(Aging) 적용</td></tr>
+    </tbody>
+  </table>
+  <div class="story-box">
+    <div class="sl">💡 핵심 공식 — 평균 대기시간</div>
+    <p><strong>대기시간</strong> = 완료시간 - 도착시간 - 실행시간<br>
+    <strong>반환시간</strong> = 완료시간 - 도착시간<br>
+    <strong>평균 대기시간</strong> = 각 프로세스 대기시간의 합 ÷ 프로세스 수</p>
+  </div>
+</div>
+
+<!-- SECTION 1: 선점 vs 비선점 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <div class="section-title-wrap">
+      <div class="section-title">선점 vs 비선점</div>
+      <div class="exam-badges"><span class="badge-exam">22년 3회</span><span class="badge-exam">25년 2회</span></div>
+    </div>
+  </div>
+  <div class="type-grid">
+    <div class="type-card nonpre">
+      <div class="type-title">비선점형 <span>Non-Preemptive</span></div>
+      <div class="type-desc">CPU를 <strong style="color:var(--text)">할당받은 프로세스가 완료될 때까지</strong> 강제로 빼앗을 수 없음. 응답 시간 예측 쉬움.</div>
+      <ul class="algo-list">
+        <li>FCFS <span>선입선출</span></li>
+        <li>SJF <span>최단 작업 우선</span></li>
+        <li>HRN <span>최고 응답률 우선</span></li>
+        <li>우선순위 <span>Priority</span></li>
+      </ul>
+    </div>
+    <div class="type-card pre">
+      <div class="type-title">선점형 <span>Preemptive</span></div>
+      <div class="type-desc">CPU를 <strong style="color:var(--text)">강제로 빼앗아</strong> 다른 프로세스에 할당 가능. 오버헤드↑, 응답성↑.</div>
+      <ul class="algo-list">
+        <li>RR <span>라운드 로빈</span></li>
+        <li>SRT <span>최단 잔류 시간</span></li>
+        <li>다단계 큐 <span>MLQ</span></li>
+        <li>다단계 피드백 큐 <span>MLFQ</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: 비선점 알고리즘 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <div class="section-title-wrap">
+      <div class="section-title">비선점형 알고리즘</div>
+      <div class="exam-badges">
+        <span class="badge-exam">20년 1회</span><span class="badge-exam">22년 3회</span><span class="badge-exam">25년 2회</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FCFS -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-non">비선점</span>
+      <div class="algo-name">FCFS<span class="algo-name-en">First Come First Served — 선입 선출</span></div>
+    </div>
+    <div class="algo-body">
+      <p><strong>먼저 도착한 프로세스를 먼저 처리.</strong> 구현이 단순하고 공정하지만, 실행시간이 긴 프로세스가 앞에 오면 전체가 기다려야 하는 <span class="point">호위 효과(Convoy Effect)</span> 발생.</p>
+      <div class="gantt-wrap">
+        <div class="gantt-label">FCFS 예시 — 도착순: P1(6ms) → P2(4ms) → P3(2ms)</div>
+        <div class="gantt" style="margin-bottom:2px;">
+          <div class="gantt-pid"></div>
+          <div class="gantt-bar-wrap">
+            <div class="gb" style="background:#3b82f6;flex:6;">P1</div>
+            <div class="gb" style="background:#22c55e;flex:4;">P2</div>
+            <div class="gb" style="background:#f97316;flex:2;">P3</div>
+          </div>
+        </div>
+        <div class="gantt-time" style="display:flex;gap:0;margin-left:28px;">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);flex:6;text-align:left;">0</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);flex:4;text-align:left;">6</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);flex:2;text-align:left;">10</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-align:right;">12</div>
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-top:8px;">P1 대기=0, P2 대기=6, P3 대기=10 → <strong style="color:var(--text)">평균 대기시간 = (0+6+10)/3 = 5.33ms</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SJF -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-non">비선점</span>
+      <div class="algo-name">SJF<span class="algo-name-en">Shortest Job First — 최단 작업 우선</span></div>
+      <span class="freq-star">★★★</span>
+    </div>
+    <div class="algo-body">
+      <p><strong>실행시간(버스트 타임)이 가장 짧은 프로세스에 CPU를 먼저 할당.</strong> 평균 대기시간이 이론적으로 최소. 단, 실행시간이 긴 프로세스는 계속 밀릴 수 있어 <span class="point">기아(Starvation) 문제</span> 발생.</p>
+      <div class="story-box" style="margin-top:8px;margin-bottom:0;">
+        <div class="sl">💡 스토리</div>
+        <p><strong>은행 창구 빠른 업무 우선</strong> — 복잡한 대출 상담 고객보다, 통장 잔액 조회만 하는 고객을 먼저 처리. 전체 평균 대기시간은 줄지만, 대출 상담 고객은 계속 기다려야 함.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HRN -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-non">비선점</span>
+      <div class="algo-name">HRN<span class="algo-name-en">Highest Response-ratio Next — 최고 응답률 우선</span></div>
+      <span class="freq-star">★★★</span>
+    </div>
+    <div class="algo-body">
+      <p>SJF의 기아 문제를 보완. <strong>대기시간이 길수록 우선순위가 높아짐</strong>. 우선순위 값이 클수록 먼저 실행.</p>
+      <div class="ex-box" style="margin:10px 0;">
+        <div class="ex-label">📐 HRN 우선순위 공식</div>
+        <div style="text-align:center;font-family:'Space Mono',monospace;font-size:16px;color:var(--accent);padding:8px 0;">
+          우선순위 = (대기시간 + 서비스시간) ÷ 서비스시간
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-top:8px;">서비스시간 = 실행시간(버스트 타임) / 대기시간이 길수록, 실행시간이 짧을수록 우선순위 높아짐</div>
+      </div>
+
+      <!-- HRN 계산기 -->
+      <div class="calc-box">
+        <div class="calc-title">🧮 HRN 우선순위 계산기</div>
+        <div class="calc-sub">대기시간과 서비스(실행)시간을 입력하세요</div>
+        <div class="calc-formula">우선순위 = ( 대기시간 + 서비스시간 ) ÷ 서비스시간</div>
+        <div class="calc-inputs">
+          <div>
+            <div class="ci-label">대기시간 (ms)</div>
+            <input class="ci-input" id="hrn-wait" type="number" placeholder="예: 5" min="0">
+          </div>
+          <div>
+            <div class="ci-label">서비스시간 (ms)</div>
+            <input class="ci-input" id="hrn-svc" type="number" placeholder="예: 3" min="1">
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcHRN()">계산하기</button>
+        <div class="calc-result" id="hrn-result">
+          <div class="cr-num" id="hrn-val">0.00</div>
+          <div class="cr-label">HRN 우선순위 (높을수록 먼저 실행)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: 선점 알고리즘 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <div class="section-title-wrap">
+      <div class="section-title">선점형 알고리즘</div>
+      <div class="exam-badges">
+        <span class="badge-exam">22년 3회</span><span class="badge-exam">24년 2회</span><span class="badge-exam">25년 2회</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RR -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-pre">선점</span>
+      <div class="algo-name">RR (Round Robin)<span class="algo-name-en">라운드 로빈 — 시간 할당량 순환</span></div>
+      <span class="freq-star">★★★★</span>
+    </div>
+    <div class="algo-body">
+      <p><strong>일정한 시간 할당량(Time Quantum/Slice)</strong>만큼 CPU를 사용하고, 완료되지 않으면 준비 큐의 맨 뒤로 이동. 시분할 시스템에 가장 적합.</p>
+      <p>▸ Time Quantum이 <strong>크면</strong> → FCFS에 가까워짐 / <strong>작으면</strong> → 문맥 교환 오버헤드 증가</p>
+      <div class="gantt-wrap">
+        <div class="gantt-label">RR 예시 — P1(4ms), P2(3ms), P3(2ms) / Quantum=2</div>
+        <div class="gantt" style="margin-bottom:2px;">
+          <div class="gantt-pid"></div>
+          <div class="gantt-bar-wrap">
+            <div class="gb" style="background:#3b82f6;flex:2;">P1</div>
+            <div class="gb" style="background:#22c55e;flex:2;">P2</div>
+            <div class="gb" style="background:#f97316;flex:2;">P3</div>
+            <div class="gb" style="background:#3b82f6;flex:2;">P1</div>
+            <div class="gb" style="background:#22c55e;flex:1;">P2</div>
+          </div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);display:flex;margin-left:28px;gap:0;">
+          <span style="flex:2;text-align:left">0</span>
+          <span style="flex:2;text-align:left">2</span>
+          <span style="flex:2;text-align:left">4</span>
+          <span style="flex:2;text-align:left">6</span>
+          <span style="flex:2;text-align:left">8</span>
+          <span style="text-align:right">9</span>
+        </div>
+      </div>
+      <div class="story-box" style="margin-top:8px;margin-bottom:0;">
+        <div class="sl">💡 스토리</div>
+        <p><strong>식당 번호표 시스템</strong> — 한 테이블에 20분씩만 앉을 수 있고, 시간이 지나면 다시 줄 뒤로. 모든 손님이 공평하게 순서를 기다림.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SRT -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-pre">선점</span>
+      <div class="algo-name">SRT<span class="algo-name-en">Shortest Remaining Time — 최단 잔류 시간</span></div>
+      <span class="freq-star">★★★</span>
+    </div>
+    <div class="algo-body">
+      <p>SJF의 <strong>선점 버전</strong>. 새로운 프로세스 도착 시, 현재 실행 중인 프로세스의 <strong>남은 시간</strong>과 비교해서 더 짧으면 선점.</p>
+      <p>▸ 이론적으로 평균 대기시간 최소. 기아 문제 있음. 문맥 교환 오버헤드 발생.</p>
+    </div>
+  </div>
+
+  <!-- 다단계 큐 -->
+  <div class="algo-card">
+    <div class="algo-head">
+      <span class="algo-badge ab-pre">선점</span>
+      <div class="algo-name">다단계 큐 / 다단계 피드백 큐<span class="algo-name-en">MLQ / MLFQ</span></div>
+    </div>
+    <div class="algo-body">
+      <p><strong>다단계 큐(MLQ)</strong>: 여러 개의 준비 큐를 두고, 각 큐마다 다른 알고리즘 적용. 프로세스가 큐 간 이동 불가.</p>
+      <p><strong>다단계 피드백 큐(MLFQ)</strong>: MLQ에서 큐 간 이동을 허용. 오래 기다린 프로세스를 상위 큐로 이동시키는 <span class="point">에이징(Aging)</span> 기법 적용 → 기아 문제 해결.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: 프로세스 상태 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <div class="section-title-wrap">
+      <div class="section-title">프로세스 상태 전이</div>
+      <div class="exam-badges"><span class="badge-exam">20년 4회</span></div>
+    </div>
+  </div>
+  <div class="def-box"><p>프로세스는 생성부터 종료까지 <strong>5가지 상태</strong>를 거치며 전이됨.</p></div>
+  <div class="state-grid">
+    <div class="state-box" style="border-color:rgba(168,85,247,.25);">
+      <div class="state-name" style="color:var(--purple);">생성</div>
+      <div class="state-en">New/Created</div>
+      <div class="state-desc">프로세스 생성, 아직 준비 큐 미진입</div>
+    </div>
+    <div class="state-box" style="border-color:rgba(59,130,246,.25);">
+      <div class="state-name" style="color:var(--blue);">준비</div>
+      <div class="state-en">Ready</div>
+      <div class="state-desc">CPU 할당 대기. 준비 큐에서 대기</div>
+    </div>
+    <div class="state-box" style="border-color:rgba(249,115,22,.25);">
+      <div class="state-name" style="color:var(--accent);">실행</div>
+      <div class="state-en">Running</div>
+      <div class="state-desc">CPU를 할당받아 명령어 실행 중</div>
+    </div>
+    <div class="state-box" style="border-color:rgba(234,179,8,.25);">
+      <div class="state-name" style="color:var(--yellow);">대기</div>
+      <div class="state-en">Waiting/Blocked</div>
+      <div class="state-desc">I/O 완료 대기. CPU 반납</div>
+    </div>
+    <div class="state-box" style="border-color:rgba(100,116,139,.25);">
+      <div class="state-name" style="color:var(--dim);">종료</div>
+      <div class="state-en">Terminated</div>
+      <div class="state-desc">실행 완료. 자원 반납</div>
+    </div>
+  </div>
+  <table class="ct" style="margin-top:14px;">
+    <thead><tr><th>상태 전이</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>생성 → 준비</td><td>프로세스가 준비 큐에 적재됨 (디스패치 대기)</td></tr>
+      <tr><td>준비 → 실행</td><td>CPU 스케줄러가 CPU를 할당 (<strong style="color:var(--text)">디스패치, Dispatch</strong>)</td></tr>
+      <tr><td>실행 → 준비</td><td>Time Quantum 초과 → 선점 (<strong style="color:var(--text)">타이머 인터럽트</strong>)</td></tr>
+      <tr><td>실행 → 대기</td><td>I/O 요청 등으로 CPU 자발적 반납 (<strong style="color:var(--text)">Block</strong>)</td></tr>
+      <tr><td>대기 → 준비</td><td>I/O 완료 → 준비 큐로 복귀 (<strong style="color:var(--text)">Wake-up</strong>)</td></tr>
+      <tr><td>실행 → 종료</td><td>프로세스 정상 완료</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 5: 인터랙티브 계산기 -->
+<div class="section">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <div class="section-title-wrap">
+      <div class="section-title">평균 대기시간 계산기</div>
+      <div class="exam-badges"><span class="badge-exam">24년 2회</span><span class="badge-exam">25년 2회</span></div>
+    </div>
+  </div>
+  <div class="def-box"><p>기출 유형처럼 프로세스를 입력하고 알고리즘을 선택하면 <strong>간트 차트 + 평균 대기시간</strong>을 자동 계산합니다.</p></div>
+
+  <div class="avg-calc">
+    <h3>🖥️ 스케줄링 시뮬레이터</h3>
+    <p class="sub">프로세스 도착시간·실행시간 입력 후 실행하기</p>
+
+    <select class="algo-select" id="algo-select" onchange="toggleQuantum()">
+      <option value="fcfs">FCFS — 선입선출 (비선점)</option>
+      <option value="sjf">SJF — 최단 작업 우선 (비선점)</option>
+      <option value="rr">RR — 라운드 로빈 (선점)</option>
+      <option value="srt">SRT — 최단 잔류 시간 (선점)</option>
+    </select>
+
+    <div class="quantum-row" id="quantum-row" style="display:none;">
+      <span class="quantum-label">Time Quantum (ms) :</span>
+      <input class="quantum-input" id="quantum" type="number" value="4" min="1">
+    </div>
+
+    <div class="proc-table-head">
+      <div class="proc-th">프로세스</div>
+      <div class="proc-th">도착시간</div>
+      <div class="proc-th">실행시간</div>
+      <div class="proc-th"></div>
+    </div>
+    <div id="proc-rows">
+      <div class="proc-row">
+        <input class="pi" value="P1" readonly>
+        <input class="pi arr" type="number" value="0" min="0">
+        <input class="pi burst" type="number" value="8" min="1">
+        <button class="del-btn" onclick="delRow(this)">×</button>
+      </div>
+      <div class="proc-row">
+        <input class="pi" value="P2" readonly>
+        <input class="pi arr" type="number" value="1" min="0">
+        <input class="pi burst" type="number" value="4" min="1">
+        <button class="del-btn" onclick="delRow(this)">×</button>
+      </div>
+      <div class="proc-row">
+        <input class="pi" value="P3" readonly>
+        <input class="pi arr" type="number" value="2" min="0">
+        <input class="pi burst" type="number" value="9" min="1">
+        <button class="del-btn" onclick="delRow(this)">×</button>
+      </div>
+      <div class="proc-row">
+        <input class="pi" value="P4" readonly>
+        <input class="pi arr" type="number" value="3" min="0">
+        <input class="pi burst" type="number" value="5" min="1">
+        <button class="del-btn" onclick="delRow(this)">×</button>
+      </div>
+    </div>
+    <button class="add-btn" onclick="addRow()">+ 프로세스 추가</button>
+
+    <button class="run-btn" onclick="runSim()">실행하기 →</button>
+
+    <div class="result-area" id="result-area">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px;">간트 차트</div>
+      <div class="result-gantt-wrap">
+        <div id="dyn-gantt"></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:10px 0 8px;">상세 결과</div>
+      <div style="overflow-x:auto;">
+        <table class="detail-table" id="detail-table"></table>
+      </div>
+      <div class="avg-result" id="avg-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>📝 실기 대비 문제</h2>
+    <p>빈칸을 채우고 채점하기를 눌러보세요</p>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 01</div>
+    <div class="q-text">다음 ①~③에 해당하는 스케줄링 알고리즘을 쓰시오. (22년 3회 기출)<br>
+    ① <em>선점형</em>으로 CPU 점유 시간이 가장 짧은 프로세스에 CPU를 먼저 할당<br>
+    ② <em>시간 단위(Time Quantum)</em>를 정해서 프로세스를 순서대로 CPU를 할당<br>
+    ③ <em>비선점형</em>으로 실행시간이 가장 짧은 프로세스에 CPU를 할당</div>
+    <div class="blank-row">
+      <div><input class="blank" id="q1a" placeholder="①"><div class="fb" id="q1a-fb"></div></div>
+      <div><input class="blank" id="q1b" placeholder="②"><div class="fb" id="q1b-fb"></div></div>
+      <div><input class="blank" id="q1c" placeholder="③"><div class="fb" id="q1c-fb"></div></div>
+    </div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 02</div>
+    <div class="q-text">HRN 스케줄링의 우선순위 계산 공식을 쓰시오. (20년 1회 기출)</div>
+    <div class="blank-row"><div><input class="blank wide" id="q2" placeholder="우선순위 = "><div class="fb" id="q2-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 03</div>
+    <div class="q-text">CPU 할당을 받은 프로세스가 <em>스스로 CPU를 반납</em>하기 전까지는 강제로 빼앗을 수 없는 스케줄링 방식은?</div>
+    <div class="blank-row"><div><input class="blank" id="q3" placeholder="정답 입력"><div class="fb" id="q3-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 04</div>
+    <div class="q-text">다음 프로세스 테이블을 보고 <em>FCFS</em> 알고리즘 적용 시 평균 대기시간을 구하시오.
+    <table class="q-proc-table"><tr><th>프로세스</th><th>도착시간</th><th>실행시간</th></tr>
+    <tr><td>P1</td><td>0</td><td>5</td></tr>
+    <tr><td>P2</td><td>0</td><td>3</td></tr>
+    <tr><td>P3</td><td>0</td><td>2</td></tr></table>
+    힌트: 도착시간이 모두 0이므로 P1→P2→P3 순으로 처리.</div>
+    <div class="blank-row"><div><input class="blank" id="q4" placeholder="X ms"><div class="fb" id="q4-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 05</div>
+    <div class="q-text">SJF 알고리즘에서 실행시간이 긴 프로세스가 계속 뒤로 밀리는 문제를 무엇이라 하는가?</div>
+    <div class="blank-row"><div><input class="blank" id="q5" placeholder="정답 입력"><div class="fb" id="q5-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 06</div>
+    <div class="q-text">다음 프로세스에 RR(Time Quantum=4) 적용 시 평균 대기시간을 구하시오. (25년 2회 기출 동일 유형)
+    <table class="q-proc-table"><tr><th>작업</th><th>도착시간</th><th>실행시간</th></tr>
+    <tr><td>P1</td><td>0</td><td>8</td></tr>
+    <tr><td>P2</td><td>1</td><td>4</td></tr>
+    <tr><td>P3</td><td>2</td><td>9</td></tr>
+    <tr><td>P4</td><td>3</td><td>5</td></tr></table></div>
+    <div class="blank-row"><div><input class="blank" id="q6" placeholder="소수점 둘째자리까지"><div class="fb" id="q6-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 07</div>
+    <div class="q-text">다단계 피드백 큐에서 오래 기다린 프로세스를 상위 큐로 이동시켜 기아 문제를 해결하는 기법은?</div>
+    <div class="blank-row"><div><input class="blank" id="q7" placeholder="정답 입력"><div class="fb" id="q7-fb"></div></div></div>
+  </div>
+
+  <div class="quiz-item">
+    <div class="q-num">Q 08</div>
+    <div class="q-text">준비 큐에서 CPU를 받아 <em>실행 상태</em>로 전이하는 동작을 무엇이라 하는가?</div>
+    <div class="blank-row"><div><input class="blank" id="q8" placeholder="정답 입력"><div class="fb" id="q8-fb"></div></div></div>
+  </div>
+
+  <button class="grade-btn" onclick="grade()">채점하기</button>
+  <div class="score-box" id="score-box">
+    <div class="score-num" id="score-num">0/10</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px;">정답 수</div>
+    <br><button class="retry-btn" onclick="retry()">다시 풀기</button>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+// 진행바
+window.addEventListener('scroll',()=>{
+  document.getElementById('prog-bar').style.width=Math.min((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100,100)+'%';
+});
+
+// HRN 계산기
+function calcHRN(){
+  const w=parseFloat(document.getElementById('hrn-wait').value);
+  const s=parseFloat(document.getElementById('hrn-svc').value);
+  if(isNaN(w)||isNaN(s)||s<=0){alert('올바른 값을 입력하세요.');return;}
+  const val=((w+s)/s).toFixed(3);
+  document.getElementById('hrn-val').textContent=val;
+  document.getElementById('hrn-result').classList.add('show');
+}
+
+// 프로세스 행 관리
+let procCount=4;
+const COLORS=['#3b82f6','#22c55e','#f97316','#a855f7','#ec4899','#14b8a6','#eab308','#ef4444'];
+function addRow(){
+  procCount++;
+  const d=document.createElement('div');
+  d.className='proc-row';
+  d.innerHTML=`<input class="pi" value="P${procCount}" readonly>
+    <input class="pi arr" type="number" value="0" min="0">
+    <input class="pi burst" type="number" value="5" min="1">
+    <button class="del-btn" onclick="delRow(this)">×</button>`;
+  document.getElementById('proc-rows').appendChild(d);
+}
+function delRow(btn){
+  const rows=document.querySelectorAll('#proc-rows .proc-row');
+  if(rows.length<=1){alert('최소 1개의 프로세스가 필요합니다.');return;}
+  btn.closest('.proc-row').remove();
+}
+function toggleQuantum(){
+  document.getElementById('quantum-row').style.display=
+    document.getElementById('algo-select').value==='rr'?'flex':'none';
+}
+
+// 시뮬레이터
+function getProcs(){
+  return Array.from(document.querySelectorAll('#proc-rows .proc-row')).map((r,i)=>({
+    name:r.querySelector('.pi').value,
+    arr:parseInt(r.querySelector('.arr').value)||0,
+    burst:parseInt(r.querySelector('.burst').value)||1,
+    rem:parseInt(r.querySelector('.burst').value)||1,
+    color:COLORS[i%COLORS.length],
+    start:-1,done:-1,wait:0
+  }));
+}
+
+function runSim(){
+  const algo=document.getElementById('algo-select').value;
+  const q=parseInt(document.getElementById('quantum').value)||4;
+  const procs=getProcs();
+  let timeline=[]; // [{name,color,start,end}]
+
+  if(algo==='fcfs') timeline=simFCFS(procs);
+  else if(algo==='sjf') timeline=simSJF(procs);
+  else if(algo==='rr') timeline=simRR(procs,q);
+  else if(algo==='srt') timeline=simSRT(procs);
+
+  renderResult(procs,timeline);
+}
+
+function simFCFS(procs){
+  const sorted=[...procs].sort((a,b)=>a.arr-b.arr);
+  let t=0,tl=[];
+  for(const p of sorted){
+    if(t<p.arr) t=p.arr;
+    p.wait=t-p.arr;
+    tl.push({name:p.name,color:p.color,start:t,end:t+p.burst});
+    t+=p.burst;
+    p.done=t;
+  }
+  return tl;
+}
+function simSJF(procs){
+  let t=0,done=0,tl=[],available=[],rem=[...procs];
+  const n=procs.length;
+  while(done<n){
+    available=rem.filter(p=>p.arr<=t&&p.done<0);
+    if(!available.length){t=Math.min(...rem.filter(p=>p.done<0).map(p=>p.arr));continue;}
+    available.sort((a,b)=>a.burst-b.burst||(a.arr-b.arr));
+    const p=available[0];
+    p.wait=t-p.arr;
+    tl.push({name:p.name,color:p.color,start:t,end:t+p.burst});
+    t+=p.burst;
+    p.done=t;done++;
+  }
+  return tl;
+}
+function simRR(procs,q){
+  const ps=procs.map(p=>({...p,rem:p.burst,done:-1,wait:0}));
+  let t=0,tl=[],queue=[],added=new Set();
+  ps.sort((a,b)=>a.arr-b.arr);
+  let idx=0;
+  while(true){
+    while(idx<ps.length&&ps[idx].arr<=t){queue.push(ps[idx]);added.add(ps[idx].name);idx++;}
+    if(!queue.length){
+      if(idx>=ps.length)break;
+      t=ps[idx].arr;continue;
+    }
+    const p=queue.shift();
+    const run=Math.min(p.rem,q);
+    tl.push({name:p.name,color:p.color,start:t,end:t+run});
+    t+=run; p.rem-=run;
+    while(idx<ps.length&&ps[idx].arr<=t){queue.push(ps[idx]);idx++;}
+    if(p.rem>0) queue.push(p);
+    else p.done=t;
+  }
+  procs.forEach((p,i)=>{const pp=ps.find(x=>x.name===p.name);p.done=pp.done;p.wait=pp.done-p.arr-p.burst;});
+  return tl;
+}
+function simSRT(procs){
+  const ps=procs.map(p=>({...p,rem:p.burst,done:-1}));
+  let t=0,tl=[],last=null;
+  const n=ps.length;
+  let fin=0;
+  while(fin<n){
+    const avail=ps.filter(p=>p.arr<=t&&p.done<0&&p.rem>0);
+    if(!avail.length){t++;continue;}
+    avail.sort((a,b)=>a.rem-b.rem||(a.arr-b.arr));
+    const p=avail[0];
+    if(tl.length&&tl[tl.length-1].name===p.name)tl[tl.length-1].end++;
+    else tl.push({name:p.name,color:p.color,start:t,end:t+1});
+    p.rem--;t++;
+    if(p.rem===0){p.done=t;fin++;}
+  }
+  // merge consecutive same process
+  const merged=[];
+  for(const seg of tl){
+    if(merged.length&&merged[merged.length-1].name===seg.name)merged[merged.length-1].end=seg.end;
+    else merged.push({...seg});
+  }
+  procs.forEach(p=>{const pp=ps.find(x=>x.name===p.name);p.done=pp.done;p.wait=pp.done-p.arr-p.burst;});
+  return merged;
+}
+
+function renderResult(procs,tl){
+  // Gantt
+  const end=Math.max(...tl.map(s=>s.end));
+  const ganttDiv=document.getElementById('dyn-gantt');
+  ganttDiv.innerHTML='';
+  const barWrap=document.createElement('div');
+  barWrap.style.cssText='display:flex;gap:1px;';
+  const timeWrap=document.createElement('div');
+  timeWrap.style.cssText='display:flex;gap:0;margin-top:3px;font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);';
+  
+  tl.forEach(seg=>{
+    const dur=seg.end-seg.start;
+    const gb=document.createElement('div');
+    gb.className='gb';
+    gb.style.cssText=`background:${seg.color};flex:${dur};`;
+    gb.textContent=dur>=2?seg.name:'';
+    gb.title=`${seg.name}: ${seg.start}~${seg.end}`;
+    barWrap.appendChild(gb);
+  });
+  tl.forEach((seg,i)=>{
+    const sp=document.createElement('div');
+    sp.style.cssText=`flex:${seg.end-seg.start};text-align:left;`;
+    sp.textContent=i===0?seg.start:'';
+    timeWrap.appendChild(sp);
+  });
+  const last=document.createElement('div');last.textContent=end;
+  timeWrap.appendChild(last);
+  ganttDiv.appendChild(barWrap);
+  ganttDiv.appendChild(timeWrap);
+
+  // Detail table
+  const tb=document.getElementById('detail-table');
+  // calc wait times from timeline
+  const procMap={};
+  procs.forEach(p=>procMap[p.name]=p);
+  tb.innerHTML=`<tr><th>프로세스</th><th>도착시간</th><th>실행시간</th><th>완료시간</th><th>대기시간</th><th>반환시간</th></tr>`;
+  let totalWait=0;
+  procs.forEach(p=>{
+    const wait=p.wait<0?0:p.wait;
+    const turnaround=p.done-p.arr;
+    totalWait+=wait;
+    tb.innerHTML+=`<tr><td>${p.name}</td><td>${p.arr}</td><td>${p.burst}</td><td>${p.done}</td><td>${wait}</td><td>${turnaround}</td></tr>`;
+  });
+  const avg=(totalWait/procs.length).toFixed(2);
+  document.getElementById('avg-result').textContent=`평균 대기시간 = ${totalWait} ÷ ${procs.length} = ${avg} ms`;
+  document.getElementById('result-area').classList.add('show');
+}
+
+// Quiz
+const ANS={
+  q1a:['srt','shortest remaining time'],
+  q1b:['rr','round robin','라운드 로빈'],
+  q1c:['sjf','shortest job first'],
+  q2:['(대기시간+서비스시간)/서비스시간','(대기시간+실행시간)/실행시간','(w+s)/s'],
+  q3:['비선점','비선점형','non-preemptive'],
+  q4:['10/3','3.33','3.33ms','10/3 ms'],
+  q5:['기아','starvation','기아 현상','기아문제'],
+  q6:['11.75','11.75ms'],
+  q7:['에이징','aging'],
+  q8:['디스패치','dispatch'],
+};
+const WIDE_IDS=['q2'];
+function check(id,ans){
+  const el=document.getElementById(id),fb=document.getElementById(id+'-fb'),v=el.value.trim().toLowerCase().replace(/\s+/g,'');
+  const ok=ans.some(a=>v===a.toLowerCase().replace(/\s+/g,''));
+  el.classList.toggle('correct',ok);el.classList.toggle('wrong',!ok);
+  if(ok){fb.textContent='✓ 정답';fb.className='fb ok';}
+  else{fb.textContent='✗ '+ans[0];fb.className='fb no';}
+  return ok;
+}
+function grade(){
+  let c=0;for(const[id,ans]of Object.entries(ANS))if(check(id,ans))c++;
+  const sb=document.getElementById('score-box');
+  document.getElementById('score-num').textContent=c+'/'+Object.keys(ANS).length;
+  sb.classList.add('show');sb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function retry(){
+  Object.keys(ANS).forEach(id=>{
+    const el=document.getElementById(id);
+    el.value='';el.className='blank'+(WIDE_IDS.includes(id)?' wide':'');
+    document.getElementById(id+'-fb').textContent='';
+  });
+  document.getElementById('score-box').classList.remove('show');
+}
+</script>
+</body>
+</html>
